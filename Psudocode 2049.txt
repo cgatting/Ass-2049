@@ -1,0 +1,5 @@
+** This is only code logic and no mention of GUI treating buttons as functions e.g. Login_Button.Pressed()
+
+Main(): #THIS IS THE LANDING PAGE
+
+
