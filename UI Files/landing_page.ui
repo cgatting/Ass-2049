@@ -31,7 +31,7 @@ border-radius: 10px</string>
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="user_login_button">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -49,7 +49,7 @@ border-radius: 5px</string>
      <string>User Login</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="buiss_login_button">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -64,10 +64,10 @@ background-color: rgb(252, 246, 245);
 border-radius: 5px</string>
     </property>
     <property name="text">
-     <string>User Login</string>
+     <string>Business Login</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="user_reg_button">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -85,7 +85,7 @@ border-radius: 5px</string>
      <string>User Register</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="terms_button">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -103,7 +103,7 @@ border-radius: 5px</string>
      <string>Terms Contracts</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="conact_button">
     <property name="geometry">
      <rect>
       <x>140</x>
