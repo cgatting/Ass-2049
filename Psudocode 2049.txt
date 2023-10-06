@@ -33,6 +33,7 @@ send_OTP(email):
     code = random value between 0000 and 9999
     send email containg OTP information
     return code
+    
 
     
 
