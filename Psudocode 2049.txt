@@ -1,5 +1,15 @@
 ** This is only code logic and no mention of GUI treating buttons as functions e.g. Login_Button.Pressed()
 
 Main(): #THIS IS THE LANDING PAGE
+    display.landing_page()
+    if user_login_button.Pressed() == true:
+        user_login()
+    elif buiss_login_button.Pressed() == true:
+        buiss_login()
+    elif user_register_button.Pressed() == true:
+        user_register()
 
+user_register(): ##THIS WILL BE THE REGISTERING PROCESS
+
+    
 
