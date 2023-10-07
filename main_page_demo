@@ -1,0 +1,131 @@
+import sys
+import sqlite3
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QScrollArea, \
+    QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout
+
+class PromotionsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Promotions App")
+        self.setGeometry(100, 100, 800, 600)
+
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+        # Create a scroll area to display promotions
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        central_widget_layout = QVBoxLayout()
+        central_widget_layout.addWidget(scroll_area)
+
+        # Create a container widget to hold promotion widgets
+        container_widget = QWidget()
+        scroll_area.setWidget(container_widget)
+        container_layout = QVBoxLayout()
+        container_widget.setLayout(container_layout)
+
+        # Fetch promotions from the database
+        self.promotions = self.fetch_promotions_from_database()
+
+        # Populate the main page with promotions
+        for promotion in self.promotions:
+            promotion_widget = self.create_promotion_widget(promotion)
+            container_layout.addWidget(promotion_widget)
+
+        # Add a button to add new promotions
+        add_promotion_button = QPushButton("Add New Promotion")
+        add_promotion_button.clicked.connect(self.show_add_promotion_dialog)
+        central_widget_layout.addWidget(add_promotion_button)
+
+        self.show()
+
+    def fetch_promotions_from_database(self):
+        conn = sqlite3.connect("promotions.db")  # Replace with your database path
+        cursor = conn.cursor()
+        cursor.execute("SELECT qr_code, text, voucher_code FROM promotions")
+        promotions = cursor.fetchall()
+        conn.close()
+        return promotions
+
+    def create_promotion_widget(self, promotion):
+        promotion_widget = QWidget()
+        promotion_layout = QVBoxLayout()
+        promotion_widget.setLayout(promotion_layout)
+
+        qr_code_label = QLabel(f"QR Code: {promotion[0]}")
+        text_label = QLabel(f"Text: {promotion[1]}")
+        voucher_label = QLabel(f"Voucher Code: {promotion[2]}")
+        details_button = QPushButton("Details")
+
+        promotion_layout.addWidget(qr_code_label)
+        promotion_layout.addWidget(text_label)
+        promotion_layout.addWidget(voucher_label)
+        promotion_layout.addWidget(details_button)
+
+        return promotion_widget
+
+    def show_add_promotion_dialog(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add New Promotion")
+        dialog.setGeometry(200, 200, 400, 200)
+
+        layout = QVBox()
+
+        qr_code_label = QLabel("QR Code:")
+        qr_code_input = QLineEdit()
+
+        text_label = QLabel("Text:")
+        text_input = QLineEdit()
+
+        voucher_label = QLabel("Voucher Code:")
+        voucher_input = QLineEdit()
+
+        add_button = QPushButton("Add Promotion")
+        add_button.clicked.connect(lambda: self.add_promotion_to_database(qr_code_input.text(), text_input.text(), voucher_input.text(), dialog))
+
+        layout.addWidget(qr_code_label)
+        layout.addWidget(qr_code_input)
+        layout.addWidget(text_label)
+        layout.addWidget(text_input)
+        layout.addWidget(voucher_label)
+        layout.addWidget(voucher_input)
+        layout.addWidget(add_button)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+    def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
+        conn = sqlite3.connect("promotions.db")  # Replace with your database path
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO promotions (qr_code, text, voucher_code) VALUES (?, ?, ?)", (qr_code, text, voucher_code))
+        conn.commit()
+        conn.close()
+
+        # Refresh the promotions list and update the UI
+        self.promotions = self.fetch_promotions_from_database()
+        self.update_ui_with_new_promotion()
+        dialog.accept()
+
+    def update_ui_with_new_promotion(self):
+        # Clear the existing widgets in the main page
+        for i in reversed(range(self.centralWidget().layout().count())):
+            self.centralWidget().layout().itemAt(i).widget().setParent(None)
+
+        # Repopulate the main page with updated promotions
+        container_widget = self.centralWidget().findChild(QWidget)
+        container_layout = container_widget.layout()
+        for promotion in self.promotions:
+            promotion_widget = self.create_promotion_widget(promotion)
+            container_layout.addWidget(promotion_widget)
+
+def main():
+    app = QApplication(sys.argv)
+    ex = PromotionsApp()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
