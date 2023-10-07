@@ -3,21 +3,24 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import random
+import sys
+import sqlite3
 
 
 class user_reg_page(object):
-    def opt_send(self):
-        _translate = QtCore.QCoreApplication.translate
+    def gen_otp():
         otp = f'{random.randint(0, 9999):04d}'
+        return otp
+    def opt_send(self, otp_code):
+        _translate = QtCore.QCoreApplication.translate
         sender_email = 'cgatting@gmail.com'
         recipient_email = self.email_address.text()
-        print(recipient_email)
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'cgatting@gmail.com'
         smtp_password = 'oytu gdvz jnkt uyjh'
         subject = 'Your OTP'
-        message = f'Your OTP is: {otp}'
+        message = f'Your OTP is: {otp_code}'
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = recipient_email
@@ -28,7 +31,29 @@ class user_reg_page(object):
         server.login(smtp_username, smtp_password)
         server.sendmail(sender_email, recipient_email, msg.as_string())
         self.send_email_button.setText(_translate("MainWindow",  "OTP Sent!"))
-        
+    def user_register(self):
+        #Write username and password of self into an SQLite database
+        _translate = QtCore.QCoreApplication.translate
+        username = self.email_address.text()
+        password = self.password.text()
+        if username == '' or password == '':
+            QtWidgets.QMessageBox.warning(self, _translate("MainWindow",  "Warning"), _translate("MainWindow",  "Please fill in all the fields"))
+        else:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("CREATE TABLE IF NOT EXISTS users(username TEXT, password TEXT)")
+            c.execute("INSERT INTO users(username, password) VALUES(?,?)", (username, password))
+            conn.commit()
+            conn.close()            
+    
+    def opt_verify(self, otp_code):
+        _translate = QtCore.QCoreApplication.translate
+        if otp_code == self.opt.text():
+            self.user_register()
+        else:
+            self.send_email_button.setText(_translate("MainWindow",  "Invalid OTP"))
+        self.user_register()
+
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -279,7 +304,9 @@ class user_reg_page(object):
         MainWindow.setStatusBar(self.statusbar)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        self.send_email_button.clicked.connect(lambda: self.opt_send())
+        self.send_email_button.clicked.connect(lambda: self.opt_send(otp_code=otp_code))
+        self.confirmation_button.clicked.connect(lambda: self.opt_verify(otp_code=otp_code))
+
 
 
     def retranslateUi(self, MainWindow):
@@ -374,6 +401,8 @@ class landing_Page(object):
         self.conact_button.setText(_translate("MainWindow", "Contact Us"))
 
 if __name__ == "__main__":
+    otp_code = "1111"
+    # otp_code = user_reg_page.gen_otp()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = landing_Page()
