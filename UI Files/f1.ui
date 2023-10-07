@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>459</height>
+    <height>472</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color:rgba(16, 30, 41, 240);
+     <string notr="true">background-color:rgb(32, 176, 124);
 border-radius: 10px</string>
     </property>
     <property name="text">
@@ -56,9 +56,9 @@ border-radius: 10px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -74,18 +74,18 @@ border-radius: 10px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -112,9 +112,9 @@ border-radius: 10px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -130,18 +130,18 @@ border-radius: 10px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -168,9 +168,9 @@ border-radius: 10px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -186,18 +186,18 @@ border-radius: 10px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -231,12 +231,15 @@ border-radius: 10px</string>
     <property name="styleSheet">
      <string notr="true">background-color: rgba(0, 0, 0, 0);
 border: 1px solid rgba(0, 0, 0, 0);
-border-bottom-color: rgba(46, 82, 101, 255);
-color: rbga(255, 255, 255);
-padding-bottom: 7px</string>
+border-bottom-color: rgba(0, 0, 0, 255);
+padding-bottom: 7px;
+color: rgb(175, 44, 116);</string>
     </property>
     <property name="text">
      <string/>
+    </property>
+    <property name="cursorPosition">
+     <number>0</number>
     </property>
     <property name="placeholderText">
      <string>Email Address</string>
@@ -257,9 +260,9 @@ padding-bottom: 7px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -275,18 +278,18 @@ padding-bottom: 7px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -313,9 +316,9 @@ padding-bottom: 7px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -331,18 +334,18 @@ padding-bottom: 7px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -369,9 +372,9 @@ padding-bottom: 7px</string>
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -387,18 +390,18 @@ padding-bottom: 7px</string>
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -432,10 +435,9 @@ padding-bottom: 7px</string>
     <property name="styleSheet">
      <string notr="true">background-color: rgba(0, 0, 0, 0);
 border: 1px solid rgba(0, 0, 0, 0);
-border-bottom-color: rgba(46, 82, 101, 255);
-color: rbga(255, 255, 255);
+border-bottom-color: rgba(0, 0, 0, 255);
 padding-bottom: 7px;
-</string>
+color: rgb(175, 44, 116);</string>
     </property>
     <property name="text">
      <string/>
@@ -462,9 +464,9 @@ padding-bottom: 7px;
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -480,18 +482,18 @@ padding-bottom: 7px;
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -518,9 +520,9 @@ padding-bottom: 7px;
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -536,18 +538,18 @@ padding-bottom: 7px;
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -574,9 +576,9 @@ padding-bottom: 7px;
        <colorrole role="WindowText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -592,18 +594,18 @@ padding-bottom: 7px;
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
        <colorrole role="ButtonText">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>64</red>
-          <green>0</green>
-          <blue>255</blue>
+          <red>175</red>
+          <green>44</green>
+          <blue>116</blue>
          </color>
         </brush>
        </colorrole>
@@ -637,15 +639,18 @@ padding-bottom: 7px;
     <property name="styleSheet">
      <string notr="true">background-color: rgba(0, 0, 0, 0);
 border: 1px solid rgba(0, 0, 0, 0);
-border-bottom-color: rgba(46, 82, 101, 255);
-color: rbga(255, 255, 255);
-padding-bottom: 7px</string>
+border-bottom-color: rgba(0, 0, 0, 255);
+padding-bottom: 7px;
+color: rgb(175, 44, 116);</string>
     </property>
     <property name="inputMask">
-     <string>9990</string>
+     <string/>
     </property>
     <property name="text">
      <string/>
+    </property>
+    <property name="maxLength">
+     <number>4</number>
     </property>
     <property name="placeholderText">
      <string>OTP</string>
@@ -663,6 +668,11 @@ padding-bottom: 7px</string>
       <height>28</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border_radius: 5px;
+color: rgb(175, 44, 116);
+background-color: rgb(252, 244, 245)</string>
+    </property>
     <property name="text">
      <string>Send Email</string>
     </property>
@@ -678,6 +688,11 @@ padding-bottom: 7px</string>
       <width>261</width>
       <height>28</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border_radius: 5px;
+color: rgb(175, 44, 116);
+background-color: rgb(252, 244, 245)</string>
     </property>
     <property name="text">
      <string>Confirm Registration</string>
@@ -699,7 +714,7 @@ padding-bottom: 7px</string>
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../../../../../Downloads/image_2023-10-05_144313622-remov.png</pixmap>
+     <pixmap>../images/Logo.png</pixmap>
     </property>
    </widget>
   </widget>
