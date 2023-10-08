@@ -2,8 +2,9 @@ import sys
 import sqlite3
 import qrcode
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton, QScrollArea, \
-    QDialog, QLineEdit, QVBoxLayout as QVBox
+    QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout, QFrame
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
 class PromotionsApp(QMainWindow):
     def __init__(self):
@@ -13,14 +14,29 @@ class PromotionsApp(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Promotions App")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 600, 800)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         central_widget_layout = QVBoxLayout()
         central_widget.setLayout(central_widget_layout)
 
+        # Create a white header
+        header_frame = QFrame()
+        header_frame.setFrameShape(QFrame.StyledPanel)
+        header_frame.setStyleSheet("background-color: white;")
+        header_frame.setFixedHeight(50)  # Set the header height
+        header_layout = QVBoxLayout()
+        header_frame.setLayout(header_layout)
+
+        # Add header content here if needed
+        header_label = QLabel("Promotions Header")
+        header_label.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(header_label)
+
+        # Create a scroll area with an island green background
         scroll_area = QScrollArea(self)
+        scroll_area.setStyleSheet("background-color: #7CFC00;")  # Island green color
         scroll_area.setWidgetResizable(True)
         central_widget_layout.addWidget(scroll_area)
 
@@ -50,11 +66,12 @@ class PromotionsApp(QMainWindow):
         return promotions
 
     def create_promotion_widget(self, promotion):
-        promotion_widget = QWidget()
+        promotion_widget = QFrame()
+        promotion_widget.setFrameShape(QFrame.StyledPanel)
+        promotion_widget.setStyleSheet("background-color: white;")
         promotion_layout = QVBoxLayout()
         promotion_widget.setLayout(promotion_layout)
 
-        # Create a QR code image from the voucher code
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -65,14 +82,9 @@ class PromotionsApp(QMainWindow):
         qr.make(fit=True)
         qr_image = qr.make_image(fill_color="black", back_color="white")
 
-        # Save the QR code as an image file
-        qr_image.save("temp_qr.png")  # Save the QR code as 'temp_qr.png'
-
-        # Load the saved QR code image using QPixmap
-        qr_pixmap = QPixmap("temp_qr.png")
-
+        qr_pixmap = QPixmap.fromImage(qr_image)
         qr_code_label = QLabel()
-        qr_code_label.setPixmap(qr_pixmap)  # Set the QR code image as the label's pixmap
+        qr_code_label.setPixmap(qr_pixmap)
 
         text_label = QLabel(f"Text: {promotion[1]}")
         voucher_label = QLabel(f"Voucher Code: {promotion[2]}")
