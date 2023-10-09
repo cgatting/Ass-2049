@@ -19,6 +19,8 @@ color pallette
 """
 
 class PromotionsApp(QMainWindow):
+    def email_QR(self):
+        return
     def filter_promotions(self, search_text, container_layout):
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
@@ -93,6 +95,8 @@ class PromotionsApp(QMainWindow):
         for promotion in self.promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
+
+            
         self.update_date_time_labels(date_label, time_label)
 
         self.timer = QTimer(self)
@@ -140,7 +144,7 @@ class PromotionsApp(QMainWindow):
         qr.make(fit=True)
         qr_image = qr.make_image(fill_color="black", back_color="white")
         qr_image.save("temp_qr.png")
-        qr_pixmap = QPixmap("temp_qr.png")
+        qr_pixmap = QPixmap(f"temp_qr.png")
 
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
@@ -152,19 +156,15 @@ class PromotionsApp(QMainWindow):
         voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
         voucher_label.setFont(QFont("Arial", 16, QFont.Bold))
         voucher_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-
-        
-
-
-        details_button = QPushButton("Send to Email")
-        details_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
+        email_button = QPushButton("Send to Email")
+        email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         save_button = QPushButton("Save Locally")
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-
+        # email_button.button.clicked.connect(email_QR)
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
         promotion_layout.addWidget(qr_code_label)
-        promotion_layout.addWidget(details_button)
+        promotion_layout.addWidget(email_button)
         promotion_layout.addWidget(save_button)
 
         return promotion_widget
@@ -189,8 +189,10 @@ class PromotionsApp(QMainWindow):
         container_widget = self.centralWidget().findChild(QWidget)
         container_layout = container_widget.layout()
         for promotion in self.promotions:
-            promotion_widget = self.create_promotion_widget(promotion)
+            count = 0
+            promotion_widget = self.create_promotion_widget(promotion, count)
             container_layout.addWidget(promotion_widget)
+            count += 1
 
     def update_date_time_labels(self, date_label, time_label):
         current_date = QDate.currentDate().toString(Qt.DefaultLocaleLongDate)
