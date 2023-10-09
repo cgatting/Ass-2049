@@ -3,20 +3,20 @@ import sqlite3
 import qrcode
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton,
-    QScrollArea, QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout, QFrame
+    QScrollArea, QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout, QFrame, QFileDialog
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon
-from PyQt5.QtCore import Qt, QTimer, QDate, QTime
-from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import Qt, QTimer, QDate, QTime, QDir
+from PyQt5 import QtCore
 import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
-
+import os
 
 """
-color pallette
+color palette
 #F5F7F7
 #edb518
 #79031D
@@ -32,9 +32,9 @@ class PromotionsApp(QMainWindow):
         smtp_port = 587
         smtp_username = 'cgatting@gmail.com'
         smtp_password = 'oytu gdvz jnkt uyjh'  # Replace with your email password
-        subject = 'QR code'
-        
-        # Create a message with the QR code as an attachment
+        subject = 'Heres your QRlife email with your QR code'
+
+        # Create a message with the QR code as an attachment and include the voucher code and text description in the email body
         message = MIMEMultipart()
         message['From'] = sender_email
         message['To'] = recipient_email
@@ -44,6 +44,12 @@ class PromotionsApp(QMainWindow):
         with open(QR_code, 'rb') as qr_file:
             qr_attachment = MIMEImage(qr_file.read())
         message.attach(qr_attachment)
+
+        # Add the voucher code and text description to the email body
+        email_body = f"Here is your QR code for the promotion:\n\nVoucher Code: {code}\nText Description: {text}"
+        text_part = MIMEText(email_body, 'plain')
+        message.attach(text_part)
+
         # Connect to the SMTP server and send the email
         try:
             server = smtplib.SMTP(smtp_server, smtp_port)
@@ -54,6 +60,20 @@ class PromotionsApp(QMainWindow):
             logging.info('Email sent successfully')
         except Exception as e:
             logging.error('Error sending email: %s', str(e))
+
+
+    def save_locally(self, qr_code_pixmap, promotion):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly  # Allow only selecting directories
+
+        directory = QFileDialog.getExistingDirectory(self, "Select a directory to save the QR code", QDir.homePath(), options=options)
+
+        if directory:
+            # Now you have the selected directory in 'directory'
+            # You can save the QR code in this directory
+            save_path = os.path.join(directory, f"temp_qr_{promotion}.png")
+            qr_code_pixmap.save(save_path)
+
     def filter_promotions(self, search_text, container_layout):
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
@@ -64,6 +84,7 @@ class PromotionsApp(QMainWindow):
         for promotion in filtered_promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
+
     def __init__(self):
         super().__init__()
 
@@ -73,8 +94,8 @@ class PromotionsApp(QMainWindow):
         logging.basicConfig(filename='myapp.txt')
         self.setWindowTitle("Promotions Dashboard")
         self.setGeometry(0, 0, 1020, 600)
-        self.setWindowIcon(QIcon("icon.png"))  
-    
+        self.setWindowIcon(QIcon("icon.png"))
+
         central_widget = QWidget()
         central_widget.setStyleSheet("background-color: #f5f5f5;")
         self.setCentralWidget(central_widget)
@@ -88,12 +109,14 @@ class PromotionsApp(QMainWindow):
         central_widget_layout.addWidget(search_input)
 
         header_widget = QFrame()
-        header_widget.setStyleSheet("background-color: #000407; border-bottom: 1px solid #000407;")  
+        header_widget.setStyleSheet("background-color: #000407; border-bottom: 1px solid #000407;")
         header_layout = QHBoxLayout()
         header_widget.setLayout(header_layout)
 
         logo_label = QLabel()
-        logo_label.setPixmap(QPixmap(r"C:\Users\cgatt\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\images\Logo.png"))
+        logo_label.setPixmap(
+            QPixmap(
+                r"C:\Users\cgatt\Desktop\Semester1\CT4029 - Principles of Programming\Assignment\Ass-2049\images\Logo.png"))
         header_layout.addWidget(logo_label)
 
         date_label = QLabel()
@@ -101,7 +124,7 @@ class PromotionsApp(QMainWindow):
         time_label = QLabel()
         time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
 
-        header_layout.addStretch(1)  
+        header_layout.addStretch(1)
         header_layout.addWidget(date_label)
         header_layout.addWidget(time_label)
 
@@ -127,7 +150,6 @@ class PromotionsApp(QMainWindow):
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
 
-            
         self.update_date_time_labels(date_label, time_label)
 
         self.timer = QTimer(self)
@@ -161,7 +183,7 @@ class PromotionsApp(QMainWindow):
 
     def create_promotion_widget(self, promotion):
         promotion_widget = QFrame()
-        promotion_widget.setStyleSheet("background-color: #79031D;") 
+        promotion_widget.setStyleSheet("background-color: #79031D;")
         promotion_layout = QVBoxLayout()
         promotion_widget.setLayout(promotion_layout)
 
@@ -191,7 +213,8 @@ class PromotionsApp(QMainWindow):
         email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         save_button = QPushButton("Save Locally")
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-        email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png": self.email_QR(qr_code))
+        email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code = promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
+        save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
         promotion_layout.addWidget(qr_code_label)
@@ -199,8 +222,6 @@ class PromotionsApp(QMainWindow):
         promotion_layout.addWidget(save_button)
 
         return promotion_widget
-
-
 
     def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
         conn = sqlite3.connect("promotions.db")
