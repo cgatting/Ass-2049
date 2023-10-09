@@ -6,9 +6,17 @@ from PyQt5.QtWidgets import (
     QScrollArea, QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout, QFrame
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon
-from PyQt5.QtCore import Qt, QTimer, QDate, QTime, QSize
+from PyQt5.QtCore import Qt, QTimer, QDate, QTime
 from PyQt5 import QtGui
 import logging
+
+"""
+color pallette
+#F5F7F7
+#edb518
+#79031D
+#000407
+"""
 
 class PromotionsApp(QMainWindow):
     def filter_promotions(self, search_text, container_layout):
@@ -27,12 +35,11 @@ class PromotionsApp(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        logging.basicConfig(filename='myapp.txt')
         self.setWindowTitle("Promotions Dashboard")
         self.setGeometry(0, 0, 1020, 600)
         self.setWindowIcon(QIcon("icon.png"))  
-        
-
-        
+    
         central_widget = QWidget()
         central_widget.setStyleSheet("background-color: #f5f5f5;")
         self.setCentralWidget(central_widget)
@@ -46,7 +53,7 @@ class PromotionsApp(QMainWindow):
         central_widget_layout.addWidget(search_input)
 
         header_widget = QFrame()
-        header_widget.setStyleSheet("background-color: #2c3e50; border-bottom: 1px solid #1a252f;")  
+        header_widget.setStyleSheet("background-color: #000407; border-bottom: 1px solid #000407;")  
         header_layout = QHBoxLayout()
         header_widget.setLayout(header_layout)
 
@@ -55,14 +62,18 @@ class PromotionsApp(QMainWindow):
         header_layout.addWidget(logo_label)
 
         date_label = QLabel()
+        date_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         time_label = QLabel()
+        time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
+
 
         header_layout.addStretch(1)  
         header_layout.addWidget(date_label)
         header_layout.addWidget(time_label)
 
         logout_button = QPushButton("Logout")
-        logout_button.setStyleSheet("background-color: #e74c3c; color: white;")
+        logout_button.setStyleSheet("QPushButton{background-color: #edb518; color: white;} QPushButton::pressed {background-color: #f3cc5f;}")
         logout_button.clicked.connect(self.logout)
         header_layout.addWidget(logout_button)
 
@@ -82,12 +93,6 @@ class PromotionsApp(QMainWindow):
         for promotion in self.promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
-
-        add_promotion_button = QPushButton("Add New Promotion")
-        add_promotion_button.setStyleSheet("background-color: #3498db; color: white;")
-        add_promotion_button.clicked.connect(self.show_add_promotion_dialog)
-        central_widget_layout.addWidget(add_promotion_button)
-
         self.update_date_time_labels(date_label, time_label)
 
         self.timer = QTimer(self)
@@ -103,7 +108,6 @@ class PromotionsApp(QMainWindow):
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS promotions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                qr_code TEXT,
                 text TEXT,
                 voucher_code TEXT
             )
@@ -122,7 +126,7 @@ class PromotionsApp(QMainWindow):
 
     def create_promotion_widget(self, promotion):
         promotion_widget = QFrame()
-        promotion_widget.setStyleSheet("background-color: #e0e0e0; border: 1px solid #ccc; border-radius: 5px;") 
+        promotion_widget.setStyleSheet("background-color: #79031D;") 
         promotion_layout = QVBoxLayout()
         promotion_widget.setLayout(promotion_layout)
 
@@ -142,13 +146,20 @@ class PromotionsApp(QMainWindow):
         qr_code_label.setPixmap(qr_pixmap)
         qr_code_label.setAlignment(Qt.AlignCenter)
 
-        text_label = QLabel(f"Text: {promotion[1]}")
-        text_label.setFont(QFont("Arial", 14, QFont.Bold))
+        text_label = QLabel(f"Text: {promotion[0]}")
+        text_label.setFont(QFont("Arial", 20, QFont.Bold))
+        text_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
+        voucher_label.setFont(QFont("Arial", 16, QFont.Bold))
+        voucher_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
+        
+
+
         details_button = QPushButton("Send to Email")
-        details_button.setStyleSheet("background-color: #2ecc71; color: white;")
+        details_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         save_button = QPushButton("Save Locally")
-        save_button.setStyleSheet("background-color: #2ecc71; color: white;")
+        save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
 
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
@@ -158,36 +169,7 @@ class PromotionsApp(QMainWindow):
 
         return promotion_widget
 
-    def show_add_promotion_dialog(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Add New Promotion")
-        dialog.setGeometry(200, 200, 400, 200)
 
-        layout = QVBox()
-
-        qr_code_label = QLabel("QR Code:")
-        qr_code_input = QLineEdit()
-
-        text_label = QLabel("Text:")
-        text_input = QLineEdit()
-
-        voucher_label = QLabel("Voucher Code:")
-        voucher_input = QLineEdit()
-
-        add_button = QPushButton("Add Promotion")
-        add_button.setStyleSheet("background-color: #3498db; color: white;")
-        add_button.clicked.connect(lambda: self.add_promotion_to_database(qr_code_input.text(), text_input.text(), voucher_input.text(), dialog))
-
-        layout.addWidget(qr_code_label)
-        layout.addWidget(qr_code_input)
-        layout.addWidget(text_label)
-        layout.addWidget(text_input)
-        layout.addWidget(voucher_label)
-        layout.addWidget(voucher_input)
-        layout.addWidget(add_button)
-
-        dialog.setLayout(layout)
-        dialog.exec_()
 
     def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
         conn = sqlite3.connect("promotions.db")
