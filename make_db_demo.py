@@ -8,14 +8,13 @@ cursor = conn.cursor()
 
 # Define sample data to be inserted
 sample_data = [
-    ("QRCode1", "Promotion 1", "Voucher1"),
-    ("QRCode2", "Promotion 2", "Voucher2"),
-    ("QRCode3", "Promotion 3", "Voucher3")
+    ("Promotion 1", "Voucher1"),
+    ("Promotion 2", "Voucher2"),
+    ("Promotion 3", "Voucher3")
 ]
 cursor.execute('''
             CREATE TABLE IF NOT EXISTS promotions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                qr_code TEXT,
                 text TEXT,
                 voucher_code TEXT
             )
@@ -23,7 +22,7 @@ cursor.execute('''
 
 # Insert sample data into the "promotions" table
 for data in sample_data:
-    cursor.execute("INSERT INTO promotions (qr_code, text, voucher_code) VALUES (?, ?, ?)", data)
+    cursor.execute("INSERT INTO promotions (text, voucher_code) VALUES (?, ?)", data)
 
 # Commit the changes and close the database connection
 conn.commit()

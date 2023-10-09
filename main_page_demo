@@ -10,42 +10,60 @@ from PyQt5.QtCore import Qt, QTimer, QDate, QTime, QSize
 from PyQt5 import QtGui
 import logging
 
-
 class PromotionsApp(QMainWindow):
+    def filter_promotions(self, search_text, container_layout):
+        # Clear existing promotions
+        for i in reversed(range(container_layout.count())):
+            container_layout.itemAt(i).widget().setParent(None)
+
+        # Filter and display promotions matching the search_text
+        filtered_promotions = [promotion for promotion in self.promotions if search_text.lower() in promotion[1].lower()]
+        for promotion in filtered_promotions:
+            promotion_widget = self.create_promotion_widget(promotion)
+            container_layout.addWidget(promotion_widget)
     def __init__(self):
         super().__init__()
 
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("Promotions App")
+        self.setWindowTitle("Promotions Dashboard")
         self.setGeometry(0, 0, 1020, 600)
-        self.setWindowIcon(QIcon("icon.png"))  # Replace "icon.png" with your app's icon file
+        self.setWindowIcon(QIcon("icon.png"))  
+        
 
+        
         central_widget = QWidget()
-        central_widget.setStyleSheet("background-color: #34495e;")  # Dark blue background
+        central_widget.setStyleSheet("background-color: #f5f5f5;")
         self.setCentralWidget(central_widget)
         central_widget_layout = QVBoxLayout()
         central_widget.setLayout(central_widget_layout)
+        search_label = QLabel("Search:")
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Enter search criteria...")
+        search_input.textChanged.connect(lambda: self.filter_promotions(search_input.text(), container_layout))
+        central_widget_layout.addWidget(search_label)
+        central_widget_layout.addWidget(search_input)
 
         header_widget = QFrame()
-        header_widget.setStyleSheet("background-color: #2c3e50; border-bottom: 1px solid #1a252f;")  # Dark header with a subtle border
+        header_widget.setStyleSheet("background-color: #2c3e50; border-bottom: 1px solid #1a252f;")  
         header_layout = QHBoxLayout()
         header_widget.setLayout(header_layout)
 
-        logout_button = QPushButton("Logout")
-        logout_button.setStyleSheet("background-color: #e74c3c; color: white;")  # Red logout button
-        logout_button.clicked.connect(self.logout)
+        logo_label = QLabel()
+        logo_label.setPixmap(QPixmap(r"C:\Users\cgatt\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\images\Logo.png"))
+        header_layout.addWidget(logo_label)
 
         date_label = QLabel()
         time_label = QLabel()
-        business_label = QLabel("DISPLAY LOGO HERE")
-        business_label.setPixmap(QtGui.QPixmap("C:\\Users\\cgatt\\Desktop\\Semister1\\CT4029 - Principles of Programming\\Assigment\\Ass-2049\\UI Files\\../images/Logo.png"))
 
-        header_layout.addWidget(business_label)
-        header_layout.addStretch(1)  # Add a flexible spacer
+        header_layout.addStretch(1)  
         header_layout.addWidget(date_label)
         header_layout.addWidget(time_label)
+
+        logout_button = QPushButton("Logout")
+        logout_button.setStyleSheet("background-color: #e74c3c; color: white;")
+        logout_button.clicked.connect(self.logout)
         header_layout.addWidget(logout_button)
 
         scroll_area = QScrollArea(self)
@@ -66,7 +84,7 @@ class PromotionsApp(QMainWindow):
             container_layout.addWidget(promotion_widget)
 
         add_promotion_button = QPushButton("Add New Promotion")
-        add_promotion_button.setStyleSheet("background-color: #3498db; color: white;")  # Blue add promotion button
+        add_promotion_button.setStyleSheet("background-color: #3498db; color: white;")
         add_promotion_button.clicked.connect(self.show_add_promotion_dialog)
         central_widget_layout.addWidget(add_promotion_button)
 
@@ -97,14 +115,14 @@ class PromotionsApp(QMainWindow):
     def fetch_promotions_from_database(self):
         conn = sqlite3.connect("promotions.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT qr_code, text, voucher_code FROM promotions")
+        cursor.execute("SELECT text, voucher_code FROM promotions")
         promotions = cursor.fetchall()
         conn.close()
         return promotions
 
     def create_promotion_widget(self, promotion):
         promotion_widget = QFrame()
-        promotion_widget.setStyleSheet("background-color: #2c3e50; border: 1px solid #34495e; color: white;")  # Dark promotion box with border
+        promotion_widget.setStyleSheet("background-color: #e0e0e0; border: 1px solid #ccc; border-radius: 5px;") 
         promotion_layout = QVBoxLayout()
         promotion_widget.setLayout(promotion_layout)
 
@@ -114,7 +132,7 @@ class PromotionsApp(QMainWindow):
             box_size=5,
             border=4,
         )
-        qr.add_data(promotion[2])
+        qr.add_data(promotion[1])
         qr.make(fit=True)
         qr_image = qr.make_image(fill_color="black", back_color="white")
         qr_image.save("temp_qr.png")
@@ -122,15 +140,15 @@ class PromotionsApp(QMainWindow):
 
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
-        qr_code_label.setAlignment(Qt.AlignRight)
+        qr_code_label.setAlignment(Qt.AlignCenter)
 
         text_label = QLabel(f"Text: {promotion[1]}")
         text_label.setFont(QFont("Arial", 14, QFont.Bold))
-        voucher_label = QLabel(f"Voucher Code: {promotion[2]}")
+        voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
         details_button = QPushButton("Send to Email")
-        details_button.setStyleSheet("background-color: #2ecc71; color: white;")  # Green send to email button
+        details_button.setStyleSheet("background-color: #2ecc71; color: white;")
         save_button = QPushButton("Save Locally")
-        save_button.setStyleSheet("background-color: #2ecc71; color: white;")  # Green save locally button
+        save_button.setStyleSheet("background-color: #2ecc71; color: white;")
 
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
@@ -157,7 +175,7 @@ class PromotionsApp(QMainWindow):
         voucher_input = QLineEdit()
 
         add_button = QPushButton("Add Promotion")
-        add_button.setStyleSheet("background-color: #3498db; color: white;")  # Blue add promotion button
+        add_button.setStyleSheet("background-color: #3498db; color: white;")
         add_button.clicked.connect(lambda: self.add_promotion_to_database(qr_code_input.text(), text_input.text(), voucher_input.text(), dialog))
 
         layout.addWidget(qr_code_label)
@@ -203,12 +221,10 @@ class PromotionsApp(QMainWindow):
         logging.info('Logout at %s', QTime.currentTime().toString(Qt.DefaultLocaleLongDate))
         self.close()
 
-
 def main():
     app = QApplication(sys.argv)
     ex = PromotionsApp()
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
