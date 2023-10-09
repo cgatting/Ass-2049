@@ -7,8 +7,13 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5.QtCore import Qt, QTimer, QDate, QTime
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 import logging
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+
 
 """
 color pallette
@@ -19,8 +24,36 @@ color pallette
 """
 
 class PromotionsApp(QMainWindow):
-    def email_QR(self):
-        return
+    def email_QR(self, QR_code, code, text):
+        _translate = QtCore.QCoreApplication.translate
+        sender_email = 'cgatting@gmail.com'  # Replace with your email
+        recipient_email = 'cgatting@gmail.com'  # Replace with the recipient's email
+        smtp_server = 'smtp.gmail.com'
+        smtp_port = 587
+        smtp_username = 'cgatting@gmail.com'
+        smtp_password = 'oytu gdvz jnkt uyjh'  # Replace with your email password
+        subject = 'QR code'
+        
+        # Create a message with the QR code as an attachment
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = recipient_email
+        message['Subject'] = subject
+
+        # Attach the QR code image to the email
+        with open(QR_code, 'rb') as qr_file:
+            qr_attachment = MIMEImage(qr_file.read())
+        message.attach(qr_attachment)
+        # Connect to the SMTP server and send the email
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, recipient_email, message.as_string())
+            server.quit()
+            logging.info('Email sent successfully')
+        except Exception as e:
+            logging.error('Error sending email: %s', str(e))
     def filter_promotions(self, search_text, container_layout):
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
@@ -67,8 +100,6 @@ class PromotionsApp(QMainWindow):
         date_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         time_label = QLabel()
         time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-
-
 
         header_layout.addStretch(1)  
         header_layout.addWidget(date_label)
@@ -143,8 +174,8 @@ class PromotionsApp(QMainWindow):
         qr.add_data(promotion[1])
         qr.make(fit=True)
         qr_image = qr.make_image(fill_color="black", back_color="white")
-        qr_image.save("temp_qr.png")
-        qr_pixmap = QPixmap(f"temp_qr.png")
+        qr_image.save(f"temp_qr_{promotion[1]}.png")
+        qr_pixmap = QPixmap(f"temp_qr_{promotion[1]}.png")
 
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
@@ -160,7 +191,7 @@ class PromotionsApp(QMainWindow):
         email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         save_button = QPushButton("Save Locally")
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-        # email_button.button.clicked.connect(email_QR)
+        email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png": self.email_QR(qr_code))
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
         promotion_layout.addWidget(qr_code_label)
@@ -190,7 +221,7 @@ class PromotionsApp(QMainWindow):
         container_layout = container_widget.layout()
         for promotion in self.promotions:
             count = 0
-            promotion_widget = self.create_promotion_widget(promotion, count)
+            promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
             count += 1
 
