@@ -17,10 +17,10 @@ import os
 
 """
 color palette
-#F5F7F7
-#edb518
-#79031D
-#000407
+#F5F7F7 - Text
+#edb518 - Standout Buttons
+#79031D - Background
+#000407 - Seperate Boxes
 """
 
 class PromotionsApp(QMainWindow):
@@ -78,7 +78,7 @@ class PromotionsApp(QMainWindow):
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
             container_layout.itemAt(i).widget().setParent(None)
-
+            
         # Filter and display promotions matching the search_text
         filtered_promotions = [promotion for promotion in self.promotions if search_text.lower() in promotion[1].lower()]
         for promotion in filtered_promotions:
