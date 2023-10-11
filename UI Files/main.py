@@ -14,7 +14,7 @@ color palette
 #79031D
 #000407
 """
-
+##NEED TO LINK AFTER LOGIN TO MAIN APPLICATION PAGE
 class business_login_page(object):        
     def error_empty(self):
         msg = QMessageBox()

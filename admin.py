@@ -1,12 +1,12 @@
 import sys
 import sqlite3
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QDialog, QVBoxLayout, QLabel, QLineEdit, QDialogButtonBox
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtWidgets import *
+
 
 class AdminPage(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("User Database Admin")
+        self.setWindowTitle("Database Admin")
         self.setGeometry(100, 100, 800, 600)
 
         self.central_widget = QWidget(self)
@@ -17,18 +17,49 @@ class AdminPage(QMainWindow):
         self.layout.addWidget(self.table_widget)
         self.table_widget.setStyleSheet("background-color: #F5F7F7; color: #000407")
 
-        self.load_data_button = self.create_button("Load Data", self.load_data)
-        self.edit_button = self.create_button("Edit Selected", self.edit_selected)
-        self.add_button = self.create_button("Add User", self.add_user)
+        self.database_name = None
+        self.table_name = None
+
+        self.database_buttons = self.create_database_buttons()
+        self.edit_button = self.create_button("Edit Item", self.edit_item)
+        self.add_button = self.create_button("Add Item", self.add_data)
+        self.delete_button = self.create_button("Remove Items", self.delete_item)
         self.search_input = self.create_search_input()
-        self.search_button = self.create_button("Search", self.search_data)
-        self.user_management_button = self.create_button("User Management", self.open_user_management)
-
         self.central_widget.setLayout(self.layout)
-
-        self.conn = sqlite3.connect('users.db')
-        self.cursor = self.conn.cursor()
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Search")
+        self.search_input.textChanged.connect(self.search_data)
+        self.conn = None
+        self.cursor = None
         self.data = []
+
+    def search_data(self, search_text):
+        search_text = self.search_input.text()
+        if not self.database_name or not self.table_name:
+            return
+
+        cursor = self.cursor
+
+        # Fetch column names
+        cursor.execute(f"PRAGMA table_info({self.table_name})")
+        column_names = [row[1] for row in cursor.fetchall()]
+
+        self.table_widget.setRowCount(0)  # Clear existing rows
+
+        # Construct the SQL query for searching
+        query = f"SELECT * FROM {self.table_name} WHERE {column_names[0]} LIKE ?"
+        for column in column_names[1:]:
+            query += f" OR {column} LIKE ?"
+
+        search_text = f"%{search_text}%"  # Add wildcards for a partial match
+
+        cursor.execute(query, tuple([search_text] * len(column_names)))
+        search_results = cursor.fetchall()
+
+        for row_num, row_data in enumerate(search_results):
+            self.table_widget.insertRow(row_num)
+            for col_num, col_data in enumerate(row_data):
+                self.table_widget.setItem(row_num, col_num, QTableWidgetItem(str(col_data)))
 
     def create_button(self, text, on_click):
         button = QPushButton(text)
@@ -39,116 +70,183 @@ class AdminPage(QMainWindow):
 
     def create_search_input(self):
         search_input = QLineEdit()
-        search_input.setPlaceholderText("Search Username")
+        search_input.setPlaceholderText("Search")
         self.layout.addWidget(search_input)
         return search_input
 
+    def create_database_buttons(self):
+        database_buttons = QWidget(self)
+        database_layout = QVBoxLayout()
+        self.user_button = self.create_button("Users Database", lambda: self.select_table('users', 'users'))
+        self.promotion_button = self.create_button("Promotions Database", lambda: self.select_table('promotions', 'promotions'))
+        database_layout.addWidget(self.user_button)
+        database_layout.addWidget(self.promotion_button)
+        database_buttons.setLayout(database_layout)
+        self.layout.addWidget(database_buttons)
+
+    def select_table(self, database_name, table_name):
+        self.database_name = database_name
+        self.table_name = table_name
+        self.conn = sqlite3.connect(f'{database_name}.db')
+        self.cursor = self.conn.cursor()
+        self.load_data()
+
     def load_data(self):
+        self.load_table_data(self.database_name, self.table_name)
+
+    def load_table_data(self, database_name, table_name):
         self.table_widget.clear()
         self.table_widget.setRowCount(0)
-        self.table_widget.setColumnCount(3)
-        self.table_widget.setHorizontalHeaderLabels(["ID", "Username", "Password"])
 
-        self.cursor.execute("SELECT * FROM users")
-        self.data = self.cursor.fetchall()
+        cursor = self.cursor
+
+        # Fetch column names
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        column_names = [row[1] for row in cursor.fetchall()]
+
+        self.table_widget.setColumnCount(len(column_names))
+        self.table_widget.setHorizontalHeaderLabels(column_names)
+
+        cursor.execute(f"SELECT * FROM {table_name}")
+        self.data = cursor.fetchall()
 
         for row_num, row_data in enumerate(self.data):
             self.table_widget.insertRow(row_num)
             for col_num, col_data in enumerate(row_data):
                 self.table_widget.setItem(row_num, col_num, QTableWidgetItem(str(col_data)))
 
-    def edit_selected(self):
+    def edit_item(self):
         selected_items = self.table_widget.selectedItems()
         if not selected_items:
             return
         row = selected_items[0].row()
-        user_id = self.data[row][0]
-        self.edit_user_dialog(user_id)
+        item_id = self.data[row][0]
+        self.edit_item_dialog(item_id)
 
-    def edit_user_dialog(self, user_id):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Edit User")
-        dialog_layout = QVBoxLayout()
-        user_data = self.get_user_data(user_id)
-        if user_data is None:
+    def edit_item_dialog(self, item_id):
+        if not self.database_name or not self.table_name:
             return
-        id_label = QLabel("ID:")
-        id_label_value = QLabel(str(user_data[0]))
-        dialog_layout.addWidget(id_label)
-        dialog_layout.addWidget(id_label_value)
-        username_input = self.create_input_field("Username", user_data[1])
-        password_input = self.create_input_field("Password", user_data[2])
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Edit Item")
+        dialog_layout = QVBoxLayout()
+
+        cursor = self.cursor
+
+        # Fetch the existing data for the selected item
+        cursor.execute(f"SELECT * FROM {self.table_name} WHERE ID = ?", (item_id,))
+        item_data = cursor.fetchone()
+
+        if item_data is None:
+            return
+
+        # Create input fields for each column in the table, excluding 'ID'
+        cursor.execute(f"PRAGMA table_info({self.table_name})")
+        column_names = [row[1] for row in cursor.fetchall()]
+
+        # Remove 'ID' from column_names
+        column_names.remove('id')
+
+        input_fields = {}
+        for column, value in zip(column_names, item_data[1:]):  # Start from 1 to skip 'ID'
+            label = QLabel(f"{column}:")
+            input_field = QLineEdit()
+            input_field.setText(str(value))
+            input_fields[column] = input_field
+            dialog_layout.addWidget(label)
+            dialog_layout.addWidget(input_field)
+
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
-        dialog_layout.addWidget(username_input)
-        dialog_layout.addWidget(password_input)
         dialog_layout.addWidget(buttons)
         dialog.setLayout(dialog_layout)
+
         result = dialog.exec_()
         if result == QDialog.Accepted:
-            new_username = username_input.text()
-            new_password = password_input.text()
-            self.update_user_data(user_id, new_username, new_password)
+            # Get edited values from input fields
+            edited_values = [input_fields[column].text() for column in column_names]
+
+            # Update the data for the selected item in the table, including 'ID'
+            set_values = ', '.join([f"{column} = ?" for column in column_names])
+            cursor.execute(f"UPDATE {self.table_name} SET {set_values} WHERE ID = ?", (*edited_values, item_id))
+            self.conn.commit()
+
+            # Refresh the table data
             self.load_data()
 
-    def create_input_field(self, label_text, default_value=""):
-        label = QLabel(label_text + ":")
-        input_field = QLineEdit()
-        input_field.setText(default_value)
-        return input_field
 
-    def get_user_data(self, user_id):
-        self.cursor.execute("SELECT * FROM users WHERE ID = ?", (user_id,))
-        user_data = self.cursor.fetchone()
-        return user_data
+    def add_data(self):
+        if not self.database_name or not self.table_name:
+            return
 
-    def update_user_data(self, user_id, new_username, new_password):
-        self.cursor.execute("UPDATE users SET username = ?, password = ? WHERE ID = ?", (new_username, new_password, user_id))
-        self.conn.commit()
-
-    def add_user(self):
-        self.add_user_dialog()
-
-    def add_user_dialog(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Add User")
+        dialog.setWindowTitle("Add Item")
         dialog_layout = QVBoxLayout()
-        username_input = self.create_input_field("Username")
-        password_input = self.create_input_field("Password")
+
+        # Create input fields for each column in the table
+        cursor = self.cursor
+        cursor.execute(f"PRAGMA table_info({self.table_name})")
+        column_names = [row[1] for row in cursor.fetchall()]
+
+        # Remove 'ID' from column_names
+        column_names.remove('ID')
+
+        input_fields = {}
+        for column in column_names:
+            label = QLabel(f"{column}:")
+            input_field = QLineEdit()
+            input_fields[column] = input_field
+            dialog_layout.addWidget(label)
+            dialog_layout.addWidget(input_field)
+
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
-        dialog_layout.addWidget(username_input)
-        dialog_layout.addWidget(password_input)
         dialog_layout.addWidget(buttons)
         dialog.setLayout(dialog_layout)
+
         result = dialog.exec_()
         if result == QDialog.Accepted:
-            self.insert_new_user(username_input.text(), password_input.text())
+            # Get values from input fields
+            values = [input_fields[column].text() for column in column_names]
+
+            # Insert the new data into the table
+            cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names)}) VALUES ({', '.join(['?'] * len(column_names))})", values)
+            self.conn.commit()
+
+            # Refresh the table data
             self.load_data()
 
-    def insert_new_user(self, username, password):
-        self.cursor.execute("INSERT INTO users(username, password) VALUES (?, ?)", (username, password))
-        self.conn.commit()
-
-    def search_data(self):
-        search_text = self.search_input.text()
-        if not search_text:
+    def delete_item(self):
+        if not self.database_name or not self.table_name:
             return
-        self.table_widget.clear()
-        self.table_widget.setRowCount(0)
-        self.table_widget.setColumnCount(3)
-        self.table_widget.setHorizontalHeaderLabels(["ID", "Username", "Password"])
-        self.cursor.execute("SELECT * FROM users WHERE username LIKE ?", ('%' + search_text + '%',))
-        search_results = self.cursor.fetchall()
-        for row_num, row_data in enumerate(search_results):
-            self.table_widget.insertRow(row_num)
-            for col_num, col_data in enumerate(row_data):
-                self.table_widget.setItem(row_num, col_num, QTableWidgetItem(str(col_data)))
 
-    def open_user_management(self):
-        pass
+        # Ensure a row is selected for deletion
+        selected_items = self.table_widget.selectedItems()
+        if not selected_items:
+            return
+
+        # Get the row number of the selected item
+        row = selected_items[0].row()
+
+        # Retrieve the item_id from the data list (assuming the ID is in the first column)
+        item_id = self.data[row][0]
+
+        # Ensure the user confirms the deletion
+        confirm = QMessageBox.question(self, 'Confirm Deletion', 'Are you sure you want to delete this item?',
+                                QMessageBox.Yes | QMessageBox.No)
+
+        if confirm == QMessageBox.Yes:
+            cursor = self.cursor
+
+            # Delete the selected item from the table
+            cursor.execute(f"DELETE FROM {self.table_name} WHERE ID = ?", (item_id,))
+            self.conn.commit()
+
+            # Remove the selected item's row from the QTableWidget
+            self.table_widget.removeRow(row)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
