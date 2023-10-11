@@ -87,11 +87,9 @@ class PromotionsApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
         self.initUI()
 
     def initUI(self):
-        logging.basicConfig(filename='myapp.txt')
         self.setWindowTitle("Promotions Dashboard")
         self.setGeometry(0, 0, 1020, 600)
         self.setWindowIcon(QIcon("icon.png"))
@@ -113,12 +111,17 @@ class PromotionsApp(QMainWindow):
         header_layout = QHBoxLayout()
         header_widget.setLayout(header_layout)
 
+        # Add the Welcome User label
+        welcome_label = QLabel("")
+        welcome_label.setStyleSheet("QLabel { color: white; font-size: 20px; }")
+        
+        header_layout.addWidget(welcome_label)
+
         logo_label = QLabel()
         logo_label.setPixmap(
             QPixmap(
                 r"C:\Users\cgatt\Desktop\Semester1\CT4029 - Principles of Programming\Assignment\Ass-2049\images\Logo.png"))
         header_layout.addWidget(logo_label)
-
         date_label = QLabel()
         date_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         time_label = QLabel()
@@ -254,8 +257,27 @@ class PromotionsApp(QMainWindow):
         time_label.setText(f"Time: {current_time}")
 
     def logout(self):
-        logging.info('Logout at %s', QTime.currentTime().toString(Qt.DefaultLocaleLongDate))
-        self.close()
+        logging.basicConfig(
+        filename="logging_file.txt",
+        level=logging.INFO,
+        format='%(asctime)s - USER LOGGED OUT'
+    )
+
+        logger = logging.getLogger()
+        logger.info('')
+        exit()
+
+    def login(self):
+        logging.basicConfig(
+            filename="logging_file.txt",
+            level=logging.INFO,
+            format='%(asctime)s - USER LOGGED In'
+        )
+
+        logger = logging.getLogger()
+        logger.info('')
+
+        
 
 def main():
     app = QApplication(sys.argv)
@@ -263,4 +285,4 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    main()
+   main()
