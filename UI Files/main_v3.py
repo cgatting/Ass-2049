@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMessageBox
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import random
+from hashlib import md5
 
 import sys
 import sqlite3
@@ -308,6 +309,13 @@ class user_reg_page(object):
         ui = user_login_page()
         ui.setupUi(MainWindow)
         MainWindow.show()
+    def login_successful(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Login Successful")
+        msg.setWindowTitle("Information")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        retval = msg.exec_()
     def error_empty(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -326,35 +334,37 @@ class user_reg_page(object):
     def user_register(self):
         username = self.email_address.text()
         password = self.password.text()
+        md5_hash_password = md5(password.encode()).hexdigest()
         first_name = self.first_name.text()
         last_name = self.last_name.text()
         DoB = self.dateEdit.text()
         if username == '' or password == '' or first_name == '' or last_name == '' or DoB == '':
             self.error_empty()
         else:
-            try:
-                conn = sqlite3.connect('users.db')
-                c = conn.cursor()
-                
-                # Create the 'users' table if it doesn't exist
-                c.execute('''CREATE TABLE IF NOT EXISTS users(
-                            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                            username TEXT,
-                            password TEXT,
-                            first_name TEXT,
-                            last_name TEXT,
-                            date_of_birth TEXT
-                          `)''')
-                
-                # Insert the user's information into the 'users' table
-                c.execute("INSERT INTO users VALUES(?,?,?,?,?,?)", (username, password, first_name, last_name, DoB))
-                
-                # Commit changes and close the connection
-                conn.commit()
-                conn.close()
-            except sqlite3.Error as e:
-                # Handle any potential database errors here
-                print("SQLite error:", e)
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            
+            # Create the 'users' table if it doesn't exist
+            c.execute('''CREATE TABLE IF NOT EXISTS users (
+                    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT,
+                    password TEXT,
+                    first_name TEXT,
+                    last_name TEXT,
+                    date_of_birth TEXT
+                )''')
+            
+            # Insert the user's information into the 'users' table
+            c.execute("INSERT INTO users (username, password, first_name, last_name, date_of_birth) VALUES(?,?,?,?,?)", (username, md5_hash_password, first_name, last_name, DoB))
+            
+            # Commit changes and close the connection
+            conn.commit()
+            conn.close()
+            self.login_successful()
+            self.confirmation_button.clicked.connect(self.user_login)
+            
+
+            
     
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -430,6 +440,8 @@ class user_reg_page(object):
         self.confirmation_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         self.confirmation_button.setCheckable(False)
         self.confirmation_button.setObjectName("confirmation_button")
+        self.confirmation_button.setText("Confirm Registration")
+        self.confirmation_button.clicked.connect(lambda: self.user_register())
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 300, 26))

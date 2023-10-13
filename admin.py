@@ -145,7 +145,7 @@ class AdminPage(QMainWindow):
         column_names = [row[1] for row in cursor.fetchall()]
 
         # Remove 'ID' from column_names
-        column_names.remove('id')
+        column_names.remove('ID')
 
         input_fields = {}
         for column, value in zip(column_names, item_data[1:]):  # Start from 1 to skip 'ID'
