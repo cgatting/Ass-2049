@@ -5,7 +5,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import random
 from hashlib import md5
-
 import sys
 import sqlite3
 
@@ -89,8 +88,6 @@ class business_login_page(object):
         self.password.setText("")
         self.password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password.setObjectName("password")
-
-    
         self.send_email_button = QtWidgets.QPushButton(self.centralwidget)
         self.send_email_button.setGeometry(QtCore.QRect(150, 310, 121, 28))
         self.send_email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
@@ -107,7 +104,7 @@ class business_login_page(object):
         self.logo.setGeometry(QtCore.QRect(10, 10, 271, 191))
         self.logo.setText("")
         self.logo.setStyleSheet("QLabel{background-color: #000407;}")
-        self.logo.setPixmap(QtGui.QPixmap("C:\\Users\\cgatt\\Desktop\\Semister1\\CT4029 - Principles of Programming\\Assigment\\Ass-2049\\UI Files\\../images/Logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap(r"C:\Users\Clayton\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\UI Files\logo.png"))
         self.logo.setObjectName("logo")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -277,7 +274,7 @@ class user_login_page(object):
         self.logo.setGeometry(QtCore.QRect(10, 10, 271, 191))
         self.logo.setText("")
         self.logo.setStyleSheet("QLabel{background-color: #000407;}")
-        self.logo.setPixmap(QtGui.QPixmap("C:\\Users\\cgatt\\Desktop\\Semister1\\CT4029 - Principles of Programming\\Assigment\\Ass-2049\\UI Files\\../images/Logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap(r"C:\Users\Clayton\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\UI Files\logo.png"))
         self.logo.setObjectName("logo")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -385,7 +382,7 @@ class user_reg_page(object):
         self.logo = QtWidgets.QLabel(self.centralwidget)
         self.logo.setGeometry(QtCore.QRect(10, 10, 270, 151))
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap("C:\\Users\\cgatt\\Desktop\\Semister1\\CT4029 - Principles of Programming\\Assigment\\Ass-2049\\UI Files\\../images/Logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap(r"C:\Users\Clayton\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\UI Files\logo.png"))
         self.logo.setObjectName("logo")
         self.logo.setStyleSheet("background-color: #000407")
         self.email_address = QtWidgets.QLineEdit(self.centralwidget)
@@ -494,7 +491,6 @@ class landing_Page(object):
         self.user_login_button = QtWidgets.QPushButton(self.centralwidget)
         self.user_login_button.setGeometry(QtCore.QRect(20, 230, 116, 28))
         self.user_login_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-
         self.user_login_button.setObjectName("user_login_button")
         self.buiss_login_button = QtWidgets.QPushButton(self.centralwidget)
         self.buiss_login_button.setGeometry(QtCore.QRect(20, 270, 235, 28))
@@ -516,7 +512,7 @@ class landing_Page(object):
         self.logo.setGeometry(QtCore.QRect(10, 10, 271, 191))
         self.logo.setText("")
         self.logo.setStyleSheet("background-color: #000407;\n")
-        self.logo.setPixmap(QtGui.QPixmap("C:\\Users\\cgatt\\Desktop\\Semister1\\CT4029 - Principles of Programming\\Assigment\\Ass-2049\\UI Files\\../images/Logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap(r"C:\Users\Clayton\Desktop\Semister1\CT4029 - Principles of Programming\Assigment\Ass-2049\UI Files\logo.png"))
         self.logo.setObjectName("logo")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
