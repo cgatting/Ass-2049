@@ -179,7 +179,7 @@ class PromotionsApp(QMainWindow):
     def fetch_promotions_from_database(self):
         conn = sqlite3.connect("promotions.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT text, voucher_code FROM promotions")
+        cursor.execute("SELECT * FROM promotions")
         promotions = cursor.fetchall()
         conn.close()
         return promotions
@@ -205,8 +205,10 @@ class PromotionsApp(QMainWindow):
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
         qr_code_label.setAlignment(Qt.AlignCenter)
-
-        text_label = QLabel(f"Text: {promotion[0]}")
+        company_label = QLabel(f"Company: {promotion[-1]}")
+        company_label.setFont(QFont("Arial", 24, QFont.Bold))
+        company_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+        text_label = QLabel(f"Text: {promotion[2]}")
         text_label.setFont(QFont("Arial", 20, QFont.Bold))
         text_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
@@ -218,6 +220,7 @@ class PromotionsApp(QMainWindow):
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code = promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
         save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
+        promotion_layout.addWidget(company_label)
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
         promotion_layout.addWidget(qr_code_label)
@@ -225,7 +228,7 @@ class PromotionsApp(QMainWindow):
         promotion_layout.addWidget(save_button)
 
         return promotion_widget
-
+    ##NEEDS EDITING
     def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
         conn = sqlite3.connect("promotions.db")
         cursor = conn.cursor()
