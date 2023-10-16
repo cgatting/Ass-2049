@@ -77,8 +77,11 @@ class AdminPage(QMainWindow):
         database_layout = QVBoxLayout()
         self.user_button = self.create_button("Users Database", lambda: self.select_table('users', 'users'))
         self.promotion_button = self.create_button("Promotions Database", lambda: self.select_table('promotions', 'promotions'))
+        self.business_login = self.create_button("Business Accounts Database", lambda: self.select_table('business', 'accounts'))
+
         database_layout.addWidget(self.user_button)
         database_layout.addWidget(self.promotion_button)
+        database_layout.addWidget(self.business_login)
         database_buttons.setLayout(database_layout)
         self.layout.addWidget(database_buttons)
 
@@ -144,16 +147,16 @@ class AdminPage(QMainWindow):
 
         # Remove 'ID' and 'password' from column_names
         column_names.remove('ID')
-        column_names.remove('password')
 
         input_fields = {}
         for column, value in zip(column_names, item_data[1:]):  # Start from 1 to skip 'ID'
-            label = QLabel(f"{column}:")
-            input_field = QLineEdit()
-            input_field.setText(str(value))
-            input_fields[column] = input_field
-            dialog_layout.addWidget(label)
-            dialog_layout.addWidget(input_field)
+            if column != "ID" and column!= 'password':
+                label = QLabel(f"{column}:")
+                input_field = QLineEdit()
+                input_field.setText(str(value))
+                input_fields[column] = input_field
+                dialog_layout.addWidget(label)
+                dialog_layout.addWidget(input_field)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
@@ -163,12 +166,16 @@ class AdminPage(QMainWindow):
 
         result = dialog.exec_()
         if result == QDialog.Accepted:
-            # Get edited values from input fields
-            edited_values = [input_fields[column].text() for column in column_names]
+            # Get edited values from input fields for columns that are not "password" or "ID"
+            edited_values = [input_fields[column].text() for column in column_names if column not in ["password", "ID"]]
 
-            # Update the data for the selected item in the table, including 'ID'
-            set_values = ', '.join([f"{column} = ?" for column in column_names])
-            cursor.execute(f"UPDATE {self.table_name} SET {set_values} WHERE ID = ?", (*edited_values, item_id))
+            # Create an SQL query to update the data
+            set_values = ', '.join([f"{column} = ?" for column in column_names if column not in ["password", "ID"]])
+            update_query = f"UPDATE {self.table_name} SET {set_values} WHERE ID = ?"
+            edited_values.append(item_id)  # Append the item_id to update the correct row
+
+            # Use parameterized query to update the data, avoiding SQL injection
+            cursor.execute(update_query, edited_values)
             self.conn.commit()
 
             # Refresh the table data
@@ -199,14 +206,6 @@ class AdminPage(QMainWindow):
             dialog_layout.addWidget(label)
             dialog_layout.addWidget(input_field)
 
-        # Password input
-        password_label = QLabel("Password:")
-        password_input = QLineEdit()
-        password_input.setEchoMode(QLineEdit.Password)
-        input_fields["password"] = password_input
-        dialog_layout.addWidget(password_label)
-        dialog_layout.addWidget(password_input)
-
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
@@ -222,9 +221,9 @@ class AdminPage(QMainWindow):
             password = input_fields["password"].text()
             md5_password = hashlib.md5(password.encode()).hexdigest()
             values.append(md5_password)
-
+            print(values)
             # Insert the new data into the table
-            cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names + ['password'])}) VALUES ({', '.join(['?'] * (len(column_names) + 1))}", values)
+            cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names)}) VALUES ({', '.join(['?'] * (len(column_names)))}", values)
             self.conn.commit()
 
             # Refresh the table data

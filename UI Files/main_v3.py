@@ -22,12 +22,11 @@ color palette
 #000407
 """
 
-
 class PromotionsApp(QMainWindow):
     def email_QR(self, QR_code, code, text):
         _translate = QtCore.QCoreApplication.translate
         sender_email = 'cgatting@gmail.com'  # Replace with your email
-        recipient_email = 'cgatting@gmail.com'  # Replace with the recipient's email
+        recipient_email = f'{user_email}'  # Replace with the recipient's email
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'cgatting@gmail.com'
@@ -85,7 +84,7 @@ class PromotionsApp(QMainWindow):
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
 
-    def initUI(self,username_email):
+    def setupUi(self, MainWindow):
         self.setWindowTitle("Promotions Dashboard")
         self.setGeometry(0, 0, 1020, 600)
         self.setWindowIcon(QIcon("icon.png"))
@@ -110,6 +109,7 @@ class PromotionsApp(QMainWindow):
         # Add the Welcome User label
         welcome_label = QLabel("")
         welcome_label.setStyleSheet("QLabel { color: white; font-size: 20px; }")
+        welcome_label.setText(f"Welcome {user_email}!")
         
         header_layout.addWidget(welcome_label)
 
@@ -129,7 +129,7 @@ class PromotionsApp(QMainWindow):
 
         logout_button = QPushButton("Logout")
         logout_button.setStyleSheet("QPushButton{background-color: #edb518; color: white;} QPushButton::pressed {background-color: #f3cc5f;}")
-        logout_button.clicked.connect(self.logout)
+        logout_button.clicked.connect(lambda _, user=user_email: self.logout(user))
         header_layout.addWidget(logout_button)
 
         scroll_area = QScrollArea(self)
@@ -252,16 +252,10 @@ class PromotionsApp(QMainWindow):
         date_label.setText(f"Date: {current_date}")
         time_label.setText(f"Time: {current_time}")
 
-    def logout(self):
-        logging.basicConfig(
-        filename="logging_file.txt",
-        level=logging.INFO,
-        format='%(asctime)s - USER LOGGED OUT'
-    )
-
-        logger = logging.getLogger()
-        logger.info('')
+    def logout(self, user):
+        print(f'User: {user} logged out')
         exit()
+        
 
     def login(self):
         logging.basicConfig(
@@ -272,8 +266,6 @@ class PromotionsApp(QMainWindow):
         logger = logging.getLogger()
         logger.info('')
 
-
-##NEED TO LINK AFTER LOGIN TO MAIN APPLICATION PAGE
 class business_login_page(object):        
     def error_empty(self):
         msg = QMessageBox()
@@ -387,6 +379,11 @@ class business_login_page(object):
         self.confirmation_button.setText(_translate("MainWindow", "Confirm Registration"))
 
 class user_login_page(object):
+    def go_to_main_page(self):
+        MainWindow.close()
+        ui = PromotionsApp()
+        ui.setupUi(MainWindow)
+        MainWindow.show()
     def user_login_message(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
@@ -394,6 +391,7 @@ class user_login_page(object):
         msg.setWindowTitle("Information")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
+        self.go_to_main_page()
     def OTP_Sent_message(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
@@ -429,6 +427,7 @@ class user_login_page(object):
         _translate = QtCore.QCoreApplication.translate
         sender_email = 'cgatting@gmail.com'
         recipient_email = self.email_address.text()
+        print(recipient_email)
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'cgatting@gmail.com'
@@ -470,7 +469,6 @@ class user_login_page(object):
             conn.close()
     
     def opt_verify(self, otp_code):
-        print(otp_code)
         _translate = QtCore.QCoreApplication.translate
         if otp_code == self.opt.text():
             self.user_login_message()
@@ -553,6 +551,8 @@ class user_login_page(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.send_email_button.clicked.connect(lambda: self.send_email())
         self.confirmation_button.clicked.connect(lambda: self.opt_verify(otp_code_email))
+        global user_email
+        user_email = self.email_address.text()
         
 
 
