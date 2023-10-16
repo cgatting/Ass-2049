@@ -220,18 +220,28 @@ class PromotionsApp(QMainWindow):
         save_button = QPushButton("Save Locally")
         email_button.setFont(QFont("Arial", 12, QFont.Bold))
         save_button.setFont(QFont("Arial", 12, QFont.Bold))
-
-
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
+        start_time_label = QLabel(f"Start Time: {promotion[-2]}")
+        end_time_label = QLabel(f"End Time: {promotion[-3]}")
+        start_time_label = QLabel(f"Time Remaining: {promotion[-3]}")
+        end_time_label.move(20, 20)
+        start_time_label.setFont(QFont("Arial", 10, QFont.Bold))
+        end_time_label.setFont(QFont("Arial", 10, QFont.Bold))
+        start_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+        end_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+        ##ASSIGN THE BUTTON CLICK FUNCTIONS##
         email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code = promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
         save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
         promotion_layout.addWidget(company_label)
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
         promotion_layout.addWidget(qr_code_label)
+        promotion_layout.addWidget(start_time_label)
+        promotion_layout.addWidget(end_time_label)
         promotion_layout.addWidget(email_button)
         promotion_layout.addWidget(save_button)
-
+  
+        
         return promotion_widget
     ##NEEDS EDITING
     def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
