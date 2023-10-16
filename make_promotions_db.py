@@ -8,7 +8,7 @@ cursor = conn.cursor()
 # Create the Promotions table if it doesn't exist
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS Promotions (
-        PromotionID INTEGER PRIMARY KEY,
+        ID INTEGER PRIMARY KEY,
         CouponCode TEXT,
         Description TEXT,
         StartDateTime DATETIME,
@@ -25,7 +25,7 @@ promotions_data = [
 ]
 
 cursor.executemany('''
-    INSERT INTO Promotions (PromotionID, CouponCode, Description, StartDateTime, EndDateTime, BusinessName)
+    INSERT INTO Promotions (ID, CouponCode, Description, StartDateTime, EndDateTime, BusinessName)
     VALUES (?, ?, ?, ?, ?, ?)
 ''', promotions_data)
 

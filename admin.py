@@ -1,8 +1,8 @@
 import sqlite3
 import getpass
 import hashlib
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QPushButton, QLineEdit, QLabel, QDialog, QDialogButtonBox, QMessageBox, QTableWidgetItem
-
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QPushButton, QLineEdit, QLabel, QDialog, QDialogButtonBox, QMessageBox, QTableWidgetItem, QDateTimeEdit
+import datetime
 class AdminPage(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -200,28 +200,46 @@ class AdminPage(QMainWindow):
         # Input fields for other columns
         input_fields = {}
         for column in column_names:
-            label = QLabel(f"{column}:")
-            input_field = QLineEdit()
-            input_fields[column] = input_field
-            dialog_layout.addWidget(label)
-            dialog_layout.addWidget(input_field)
+            if "DateTime" in column:
+                label = QLabel(f"{column}:")
+                input_field = QDateTimeEdit()
+                input_fields[column] = input_field
+                dialog_layout.addWidget(label)
+                dialog_layout.addWidget(input_field)
+            else:
+                label = QLabel(f"{column}:")
+                input_field = QLineEdit()
+                input_fields[column] = input_field
+                dialog_layout.addWidget(label)
+                dialog_layout.addWidget(input_field)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
         dialog_layout.addWidget(buttons)
         dialog.setLayout(dialog_layout)
-
         result = dialog.exec_()
         if result == QDialog.Accepted:
             # Get values from input fields, including the password
             values = [input_fields[column].text() for column in column_names]
 
             # Encrypt the password with MD5
-            password = input_fields["password"].text()
-            md5_password = hashlib.md5(password.encode()).hexdigest()
-            values[1]=(md5_password)
-            print(values)
+            try:
+                password = input_fields["password"].text()
+                md5_password = hashlib.md5(password.encode()).hexdigest()
+                values[1]=(md5_password)
+                print(values)
+            except:
+                pass
+            #FORMAT STARTDATETIME and ENDDATETIME TO DATETIME FORMATS DD/MM/YYYY HH:MM
+            try:
+                values[2] = datetime.datetime.strptime(values[2], '%d/%m/%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+            except:
+                pass
+            try:
+                values[3] = datetime.datetime.strptime(values[3], '%d/%m/%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+            except:
+                pass
             # Insert the new data into the table
             cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names)}) VALUES ({', '.join(['?'] * len(column_names))})", values)
             self.conn.commit()

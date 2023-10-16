@@ -145,6 +145,8 @@ class PromotionsApp(QMainWindow):
         scroll_area.setWidget(container_widget)
         container_layout = QVBoxLayout()
         container_widget.setLayout(container_layout)
+        container_widget.setStyleSheet("border-radius: 10px;")
+        scroll_area.setStyleSheet("border-radius: 10px;")
 
         self.create_promotions_table()
         self.promotions = self.fetch_promotions_from_database()
@@ -201,7 +203,6 @@ class PromotionsApp(QMainWindow):
         qr_image = qr.make_image(fill_color="black", back_color="white")
         qr_image.save(f"temp_qr_{promotion[1]}.png")
         qr_pixmap = QPixmap(f"temp_qr_{promotion[1]}.png")
-
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
         qr_code_label.setAlignment(Qt.AlignCenter)
