@@ -218,6 +218,10 @@ class PromotionsApp(QMainWindow):
         email_button = QPushButton("Send to Email")
         email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         save_button = QPushButton("Save Locally")
+        email_button.setFont(QFont("Arial", 12, QFont.Bold))
+        save_button.setFont(QFont("Arial", 12, QFont.Bold))
+
+
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code = promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
         save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
