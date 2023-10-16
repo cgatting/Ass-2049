@@ -1,19 +1,18 @@
-import sys
 import sqlite3
 import qrcode
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton,
-    QScrollArea, QDialog, QLineEdit, QVBoxLayout as QVBox, QHBoxLayout, QFrame, QFileDialog
+    QScrollArea, QFrame, QFileDialog, QLineEdit, QHBoxLayout
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon
-from PyQt5.QtCore import Qt, QTimer, QDate, QTime, QDir
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QTimer
 import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 import os
+import datetime
 
 """
 color palette
@@ -25,14 +24,13 @@ color palette
 
 class PromotionsApp(QMainWindow):
     def email_QR(self, QR_code, code, text):
-        _translate = QtCore.QCoreApplication.translate
         sender_email = 'cgatting@gmail.com'  # Replace with your email
         recipient_email = 'cgatting@gmail.com'  # Replace with the recipient's email
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'cgatting@gmail.com'
         smtp_password = 'oytu gdvz jnkt uyjh'  # Replace with your email password
-        subject = 'Heres your QRlife email with your QR code'
+        subject = "Here's your QRlife email with your QR code"
 
         # Create a message with the QR code as an attachment and include the voucher code and text description in the email body
         message = MIMEMultipart()
@@ -61,7 +59,6 @@ class PromotionsApp(QMainWindow):
         except Exception as e:
             logging.error('Error sending email: %s', str(e))
 
-
     def save_locally(self, qr_code_pixmap, promotion):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly  # Allow only selecting directories
@@ -74,20 +71,21 @@ class PromotionsApp(QMainWindow):
             save_path = os.path.join(directory, f"temp_qr_{promotion}.png")
             qr_code_pixmap.save(save_path)
 
+    def update_remaining_time_label(self, remaining_time_label, end_time):
+        remaining_time = end_time - datetime.datetime.now()
+        remaining_time -= datetime.timedelta(microseconds=remaining_time.microseconds)
+        remaining_time_label.setText(f"Time Remaining: {remaining_time}")
+
     def filter_promotions(self, search_text, container_layout):
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
             container_layout.itemAt(i).widget().setParent(None)
-            
+
         # Filter and display promotions matching the search_text
         filtered_promotions = [promotion for promotion in self.promotions if search_text.lower() in promotion[1].lower()]
         for promotion in filtered_promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
-
-    def __init__(self):
-        super().__init__()
-        self.initUI()
 
     def initUI(self):
         self.setWindowTitle("Promotions Dashboard")
@@ -117,10 +115,9 @@ class PromotionsApp(QMainWindow):
         
         header_layout.addWidget(welcome_label)
 
+        # Add your logo here (replace path)
         logo_label = QLabel()
-        logo_label.setPixmap(
-            QPixmap(
-                r"C:\Users\cgatt\Desktop\Semester1\CT4029 - Principles of Programming\Assignment\Ass-2049\images\Logo.png"))
+        logo_label.setPixmap(QPixmap(r"path_to_logo.png"))
         header_layout.addWidget(logo_label)
         date_label = QLabel()
         date_label.setStyleSheet("QLabel { color : #F5F7F7; }")
@@ -154,12 +151,6 @@ class PromotionsApp(QMainWindow):
         for promotion in self.promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
-
-        self.update_date_time_labels(date_label, time_label)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(lambda: self.update_date_time_labels(date_label, time_label))
-        self.timer.start(1000)
 
         self.show()
 
@@ -223,14 +214,23 @@ class PromotionsApp(QMainWindow):
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
         start_time_label = QLabel(f"Start Time: {promotion[-2]}")
         end_time_label = QLabel(f"End Time: {promotion[-3]}")
-        start_time_label = QLabel(f"Time Remaining: {promotion[-3]}")
+        remaining_time_label = QLabel(f"Time Remaining: {datetime.datetime.strptime(promotion[-3], '%Y-%m-%d %H:%M:%S') - datetime.datetime.now()}")
         end_time_label.move(20, 20)
         start_time_label.setFont(QFont("Arial", 10, QFont.Bold))
         end_time_label.setFont(QFont("Arial", 10, QFont.Bold))
+        remaining_time_label.setFont(QFont("Arial", 10, QFont.Bold))
         start_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         end_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-        ##ASSIGN THE BUTTON CLICK FUNCTIONS##
-        email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code = promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
+        remaining_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
+        end_time = datetime.datetime.strptime(promotion[-3], '%Y-%m-%d %H:%M:%S')
+        # Update the remaining time label periodically
+        self.remaining_time_timer = QTimer(self)
+        self.remaining_time_timer.timeout.connect(lambda: self.update_remaining_time_label(remaining_time_label, end_time))
+        self.remaining_time_timer.start(100)
+
+        ## ASSIGN THE BUTTON CLICK FUNCTIONS ##
+        email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code=promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
         save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
         promotion_layout.addWidget(company_label)
         promotion_layout.addWidget(text_label)
@@ -238,41 +238,11 @@ class PromotionsApp(QMainWindow):
         promotion_layout.addWidget(qr_code_label)
         promotion_layout.addWidget(start_time_label)
         promotion_layout.addWidget(end_time_label)
+        promotion_layout.addWidget(remaining_time_label)
         promotion_layout.addWidget(email_button)
         promotion_layout.addWidget(save_button)
-  
-        
+
         return promotion_widget
-    ##NEEDS EDITING
-    def add_promotion_to_database(self, qr_code, text, voucher_code, dialog):
-        conn = sqlite3.connect("promotions.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO promotions (qr_code, text, voucher_code) VALUES (?, ?, ?)", (qr_code, text, voucher_code))
-        conn.commit()
-        conn.close()
-
-        self.promotions = self.fetch_promotions_from_database()
-        self.update_ui_with_new_promotion()
-        dialog.accept()
-
-    def update_ui_with_new_promotion(self):
-        for i in reversed(range(self.centralWidget().layout().count())):
-            self.centralWidget().layout().itemAt(i).widget().setParent(None)
-
-        container_widget = self.centralWidget().findChild(QWidget)
-        container_layout = container_widget.layout()
-        for promotion in self.promotions:
-            count = 0
-            promotion_widget = self.create_promotion_widget(promotion)
-            container_layout.addWidget(promotion_widget)
-            count += 1
-
-    def update_date_time_labels(self, date_label, time_label):
-        current_date = QDate.currentDate().toString(Qt.DefaultLocaleLongDate)
-        current_time = QTime.currentTime().toString(Qt.DefaultLocaleLongDate)
-
-        date_label.setText(f"Date: {current_date}")
-        time_label.setText(f"Time: {current_time}")
 
     def logout(self):
         logging.basicConfig(
@@ -285,22 +255,12 @@ class PromotionsApp(QMainWindow):
         logger.info('')
         exit()
 
-    def login(self):
-        logging.basicConfig(
-            filename="logging_file.txt",
-            level=logging.INFO,
-            format='%(asctime)s - USER LOGGED In'
-        )
-
-        logger = logging.getLogger()
-        logger.info('')
-
-        
-
 def main():
-    app = QApplication(sys.argv)
+    app = QApplication([])
     ex = PromotionsApp()
-    sys.exit(app.exec_())
+    ex.initUI()
+    ex.show()
+    app.exec_()
 
 if __name__ == '__main__':
-   main()
+    main()
