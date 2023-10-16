@@ -1,7 +1,7 @@
-import sys
 import sqlite3
+import getpass
+import hashlib
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QPushButton, QLineEdit, QLabel, QDialog, QDialogButtonBox, QMessageBox, QTableWidgetItem
-
 
 class AdminPage(QMainWindow):
     def __init__(self):
@@ -26,9 +26,7 @@ class AdminPage(QMainWindow):
         self.delete_button = self.create_button("Remove Items", self.delete_item)
         self.search_input = self.create_search_input()
         self.central_widget.setLayout(self.layout)
-        search_input = QLineEdit()
-        search_input.setPlaceholderText("Search")
-        self.search_input.textChanged.connect(self.search_data)
+
         self.conn = None
         self.cursor = None
         self.data = []
@@ -140,12 +138,13 @@ class AdminPage(QMainWindow):
         if item_data is None:
             return
 
-        # Create input fields for each column in the table, excluding 'ID'
+        # Create input fields for each column in the table, excluding 'ID' and 'password'
         cursor.execute(f"PRAGMA table_info({self.table_name})")
         column_names = [row[1] for row in cursor.fetchall()]
 
-        # Remove 'ID' from column_names
+        # Remove 'ID' and 'password' from column_names
         column_names.remove('ID')
+        column_names.remove('password')
 
         input_fields = {}
         for column, value in zip(column_names, item_data[1:]):  # Start from 1 to skip 'ID'
@@ -175,7 +174,6 @@ class AdminPage(QMainWindow):
             # Refresh the table data
             self.load_data()
 
-
     def add_data(self):
         if not self.database_name or not self.table_name:
             return
@@ -192,6 +190,7 @@ class AdminPage(QMainWindow):
         # Remove 'ID' from column_names
         column_names.remove('ID')
 
+        # Input fields for other columns
         input_fields = {}
         for column in column_names:
             label = QLabel(f"{column}:")
@@ -199,6 +198,14 @@ class AdminPage(QMainWindow):
             input_fields[column] = input_field
             dialog_layout.addWidget(label)
             dialog_layout.addWidget(input_field)
+
+        # Password input
+        password_label = QLabel("Password:")
+        password_input = QLineEdit()
+        password_input.setEchoMode(QLineEdit.Password)
+        input_fields["password"] = password_input
+        dialog_layout.addWidget(password_label)
+        dialog_layout.addWidget(password_input)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=dialog)
         buttons.accepted.connect(dialog.accept)
@@ -208,11 +215,16 @@ class AdminPage(QMainWindow):
 
         result = dialog.exec_()
         if result == QDialog.Accepted:
-            # Get values from input fields
+            # Get values from input fields, including the password
             values = [input_fields[column].text() for column in column_names]
 
+            # Encrypt the password with MD5
+            password = input_fields["password"].text()
+            md5_password = hashlib.md5(password.encode()).hexdigest()
+            values.append(md5_password)
+
             # Insert the new data into the table
-            cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names)}) VALUES ({', '.join(['?'] * len(column_names))})", values)
+            cursor.execute(f"INSERT INTO {self.table_name} ({', '.join(column_names + ['password'])}) VALUES ({', '.join(['?'] * (len(column_names) + 1))}", values)
             self.conn.commit()
 
             # Refresh the table data
@@ -234,8 +246,7 @@ class AdminPage(QMainWindow):
         item_id = self.data[row][0]
 
         # Ensure the user confirms the deletion
-        confirm = QMessageBox.question(self, 'Confirm Deletion', 'Are you sure you want to delete this item?',
-                                QMessageBox.Yes | QMessageBox.No)
+        confirm = QMessageBox.question(self, 'Confirm Deletion', 'Are you sure you want to delete this item?', QMessageBox.Yes | QMessageBox.No)
 
         if confirm == QMessageBox.Yes:
             cursor = self.cursor
@@ -247,9 +258,8 @@ class AdminPage(QMainWindow):
             # Remove the selected item's row from the QTableWidget
             self.table_widget.removeRow(row)
 
-
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QApplication([])
     window = AdminPage()
     window.show()
-    sys.exit(app.exec_())
+    app.exec()
