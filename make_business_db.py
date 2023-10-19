@@ -18,7 +18,9 @@ cursor.execute('''
 demo_accounts = [
     ('user1@example.com', 'password1', 'Business 1'),
     ('user2@example.com', 'password2', 'Business 2'),
-    ('user3@example.com', 'password3', 'Business 3')
+    ('user3@example.com', 'password3', 'BMW'),
+    ('user10@example.com', 'password10', 'BMW')
+
 ]
 
 # Insert the demo accounts into the database without specifying the 'id' field
