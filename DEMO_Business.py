@@ -45,7 +45,7 @@ class LoginPage(QMainWindow):
         return user
 
     def open_business_main_page(self):
-        self.business_main_page = BusinessMainPage()
+        self.business_main_page = BusinessMainPage(username=self.username_input.text())
         self.business_main_page.show()
         self.close()
 

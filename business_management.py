@@ -4,7 +4,15 @@ import datetime
 import sys
 class BusinessMainPage(QMainWindow):
     
-    def __init__(self, bus_username="BMW"):
+    def __init__(self, username):
+        def get_business_data():
+            conn = sqlite3.connect("business.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT business_name FROM accounts WHERE email=?", (username,))
+            user = cursor.fetchone()
+            conn.close()
+            return user
+        bus_username = get_business_data()
         super().__init__()
         self.setWindowTitle("Database Admin")
         self.setGeometry(100, 100, 800, 600)
