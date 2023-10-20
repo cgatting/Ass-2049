@@ -248,11 +248,9 @@ class AdminPage(QMainWindow):
         dialog.setLayout(dialog_layout)
         result = dialog.exec_()
         if result == QDialog.Accepted:
-            values = [input_fields[column].text() for column in self.column_names]
-
+            values = [input_fields[column].text() for column in self.column_names if column not in ["ID"]]
             self.encrypt_password(values)
             self.format_datetime(values)
-
             self.insert_data(values)
             self.load_data()
 

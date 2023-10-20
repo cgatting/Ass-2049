@@ -34,9 +34,14 @@ class LoginPage(QMainWindow):
         password = self.password_input.text()
         conn = sqlite3.connect("business.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM accounts WHERE username=? AND password=?", (username, password))
+        cursor.execute("SELECT * FROM accounts WHERE email=? AND password=?", (username, password))
         user = cursor.fetchone()
-        conn.close()
+        print(user[1], user[2])
+        if user is None:
+            self.show_error_message("Invalid username or password")
+        if user[1] == username and user[2] == password:
+            self.show_success_message("Login successful")
+            self.open_business_main_page()
         return user
 
     def open_business_main_page(self):
