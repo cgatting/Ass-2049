@@ -258,7 +258,7 @@ class AdminPage(QMainWindow):
         # Encrypt the password using MD5 if there is a 'password' column
         password_column = "password"
         if password_column in self.column_names:
-            password_index = self.column_names.index(password_column)
+            password_index = self.column_names.index(password_column)-1
             password = values[password_index]
             md5_password = hashlib.md5(password.encode()).hexdigest()
             values[password_index] = md5_password
@@ -274,7 +274,7 @@ class AdminPage(QMainWindow):
 
     def insert_data(self, values):
         # Insert the new item into the table
-        insert_query = f"INSERT INTO {self.table_name} ({', '.join(self.column_names)}) VALUES ({', '.join(['?'] * len(self.column_names))})"
+        insert_query = f"INSERT INTO {self.table_name} ({', '.join(self.column_names[1:])}) VALUES ({', '.join(['?'] * (len(self.column_names) - 1))})"
         self.cursor.execute(insert_query, values)
         self.conn.commit()
         self.load_data()

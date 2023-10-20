@@ -1,10 +1,11 @@
+from msilib.schema import CompLocator
 import sqlite3
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QPushButton, QTableWidgetItem, QDialog, QDialogButtonBox, QLineEdit, QLabel, QDateTimeEdit
 import datetime
 import sys
 class BusinessMainPage(QMainWindow):
     
-    def __init__(self, username):
+    def __init__(self, username="demo@demo.com"):
         def get_business_data():
             conn = sqlite3.connect("business.db")
             cursor = conn.cursor()
@@ -65,7 +66,7 @@ class BusinessMainPage(QMainWindow):
         self.table_widget.setHorizontalHeaderLabels(column_names)
 
         # Select data only for the specified business (using a WHERE clause)
-        cursor.execute(f"SELECT * FROM {table_name} WHERE BusinessName = ?", (self.bus_username,))
+        cursor.execute(f"SELECT * FROM {table_name} WHERE BusinessName = ?", (self.bus_username))
         self.data = cursor.fetchall()
 
         for row_num, row_data in enumerate(self.data):
@@ -142,12 +143,14 @@ class BusinessMainPage(QMainWindow):
         # Create input fields for each column
         input_fields = {}
         for column_name in column_names:
-            label = QLabel(f"{column_name}:")
-            input_field = QLineEdit()
-            input_fields[column_name] = input_field
-            add_layout.addWidget(label)
-            add_layout.addWidget(input_field)
+            if column_name != "ID":
+                label = QLabel(f"{column_name}:")
+                input_field = QDateTimeEdit() if column_name in ["StartDate", "EndDate"] else QLineEdit()
+                input_fields[column_name] = input_field
+                add_layout.addWidget(label)
+                add_layout.addWidget(input_field)
 
+]
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=add_dialog)
         buttons.accepted.connect(add_dialog.accept)
         buttons.rejected.connect(add_dialog.reject)
@@ -161,20 +164,26 @@ class BusinessMainPage(QMainWindow):
             # Get the new data from the input fields
             new_data = []
             for column_name in column_names:
-                new_data.append(input_fields[column_name].text())
+                if column_name != "ID":
+                    new_data.append(input_fields[column_name].text())
 
             # Save the new data to the database
             self.save_new_data(new_data)
 
     def save_new_data(self, new_data):
-        # Construct an SQL query to insert the new data into the database
-        columns = ', '.join(self.table_widget.horizontalHeaderItem(col).text() for col in range(self.table_widget.columnCount()))
-        values = ', '.join(['?'] * self.table_widget.columnCount())
-
-        insert_query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({values})"
+    # Construct an SQL query to insert the new data into the database
+        columns = ', '.join(self.table_widget.horizontalHeaderItem(col).text() for col in range(self.table_widget.columnCount()) if self.table_widget.horizontalHeaderItem(col).text() != "ID")
+        placeholders = ', '.join(['?'] * len(new_data))
+        insert_query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({placeholders})"
 
         # Execute the SQL INSERT statement
         self.cursor.execute(insert_query, new_data)
         self.conn.commit()
         self.load_data()
 
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    login_app = BusinessMainPage()
+    login_app.show()
+    sys.exit(app.exec_())

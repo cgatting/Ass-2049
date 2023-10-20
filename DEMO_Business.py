@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from business_management import BusinessMainPage
 import sqlite3
+import hashlib
 class LoginPage(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -32,13 +33,15 @@ class LoginPage(QMainWindow):
     def login(self):
         username = self.username_input.text()
         password = self.password_input.text()
+        password = hashlib.md5(password.encode()).hexdigest()
         conn = sqlite3.connect("business.db")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM accounts WHERE email=? AND password=?", (username, password))
         user = cursor.fetchone()
-        print(user[1], user[2])
+        print(user)
         if user is None:
             self.show_error_message("Invalid username or password")
+            self.login()
         if user[1] == username and user[2] == password:
             self.show_success_message("Login successful")
             self.open_business_main_page()
