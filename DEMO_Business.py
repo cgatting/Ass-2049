@@ -66,8 +66,3 @@ class LoginPage(QMainWindow):
         msg.setWindowTitle("Error")
         msg.exec_()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    login_app = LoginPage()
-    login_app.show()
-    sys.exit(app.exec_())

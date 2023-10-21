@@ -145,12 +145,12 @@ class BusinessMainPage(QMainWindow):
         for column_name in column_names:
             if column_name != "ID":
                 label = QLabel(f"{column_name}:")
-                input_field = QDateTimeEdit() if column_name in ["StartDate", "EndDate"] else QLineEdit()
+                input_field = QDateTimeEdit() if column_name in ["StartDateTime", "EndDateTime"] else QLineEdit()
                 input_fields[column_name] = input_field
                 add_layout.addWidget(label)
                 add_layout.addWidget(input_field)
 
-]
+        # Add a "Save" button
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, parent=add_dialog)
         buttons.accepted.connect(add_dialog.accept)
         buttons.rejected.connect(add_dialog.reject)
@@ -181,9 +181,3 @@ class BusinessMainPage(QMainWindow):
         self.conn.commit()
         self.load_data()
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    login_app = BusinessMainPage()
-    login_app.show()
-    sys.exit(app.exec_())

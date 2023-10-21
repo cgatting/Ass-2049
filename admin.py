@@ -186,7 +186,7 @@ class AdminPage(QMainWindow):
                 label = QLabel(f"{column}:")
                 if "DateTime" in column:
                     input_field = QDateTimeEdit()
-                    input_field.setDateTime(datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+                    input_field.setDateTime(datetime.datetime.strptime(value, "%d/%m/%Y %H:%M"))
                 else:
                     input_field = QLineEdit()
                     input_field.setText(str(value))

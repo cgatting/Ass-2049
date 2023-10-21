@@ -23,6 +23,9 @@ color palette
 """
 
 class PromotionsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.promotion_timers = {}
     def email_QR(self, QR_code, code, text):
         sender_email = 'cgatting@gmail.com'  # Replace with your email
         recipient_email = 'cgatting@gmail.com'  # Replace with the recipient's email
@@ -72,20 +75,31 @@ class PromotionsApp(QMainWindow):
             qr_code_pixmap.save(save_path)
 
     def update_remaining_time_label(self, remaining_time_label, end_time):
-        remaining_time = end_time - datetime.datetime.now()
-        remaining_time -= datetime.timedelta(microseconds=remaining_time.microseconds)
-        remaining_time_label.setText(f"Time Remaining: {remaining_time}")
+        if remaining_time_label:
+            remaining_time = end_time - datetime.datetime.now()
+            remaining_time -= datetime.timedelta(microseconds=remaining_time.microseconds)
+            remaining_time_label.setText(f"Time Remaining: {remaining_time}")
+
 
     def filter_promotions(self, search_text, container_layout):
+    # Stop and clean up existing timers
+        for promotion in self.promotions:
+            if hasattr(promotion, 'timer'):
+                promotion.timer.stop()
+                promotion.timer.deleteLater()
+
         # Clear existing promotions
         for i in reversed(range(container_layout.count())):
-            container_layout.itemAt(i).widget().setParent(None)
+            widget = container_layout.itemAt(i).widget()
+            container_layout.removeWidget(widget)
 
         # Filter and display promotions matching the search_text
         filtered_promotions = [promotion for promotion in self.promotions if search_text.lower() in promotion[1].lower()]
         for promotion in filtered_promotions:
             promotion_widget = self.create_promotion_widget(promotion)
             container_layout.addWidget(promotion_widget)
+
+
 
     def initUI(self):
         self.setWindowTitle("Promotions Dashboard")
@@ -183,6 +197,33 @@ class PromotionsApp(QMainWindow):
         promotion_layout = QVBoxLayout()
         promotion_widget.setLayout(promotion_layout)
 
+        remaining_time_label = QLabel()
+        remaining_time_label.setFont(QFont("Arial", 10, QFont.Bold))
+        remaining_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+        end_time = datetime.datetime.strptime(promotion[-3], '%d/%m/%Y %H:%M')
+
+        # Calculate the initial time remaining
+        remaining_time = end_time - datetime.datetime.now()
+        remaining_time -= datetime.timedelta(microseconds=remaining_time.microseconds)
+        remaining_time_label.setText(f"Time Remaining: {remaining_time}")
+
+        # Update the remaining time label periodically
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.update_remaining_time_label(remaining_time_label, end_time))
+        timer.start(100)
+
+        company_label = QLabel(f"Company: {promotion[-1]}")
+        company_label.setFont(QFont("Arial", 24, QFont.Bold))
+        company_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+        
+        text_label = QLabel(f"Text: {promotion[2]}")
+        text_label.setFont(QFont("Arial", 20, QFont.Bold))
+        text_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
+        voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
+        voucher_label.setFont(QFont("Arial", 16, QFont.Bold))
+        voucher_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -197,41 +238,32 @@ class PromotionsApp(QMainWindow):
         qr_code_label = QLabel()
         qr_code_label.setPixmap(qr_pixmap)
         qr_code_label.setAlignment(Qt.AlignCenter)
-        company_label = QLabel(f"Company: {promotion[-1]}")
-        company_label.setFont(QFont("Arial", 24, QFont.Bold))
-        company_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-        text_label = QLabel(f"Text: {promotion[2]}")
-        text_label.setFont(QFont("Arial", 20, QFont.Bold))
-        text_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-        voucher_label = QLabel(f"Voucher Code: {promotion[1]}")
-        voucher_label.setFont(QFont("Arial", 16, QFont.Bold))
-        voucher_label.setStyleSheet("QLabel { color : #F5F7F7; }")
+
         email_button = QPushButton("Send to Email")
         email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-        save_button = QPushButton("Save Locally")
         email_button.setFont(QFont("Arial", 12, QFont.Bold))
-        save_button.setFont(QFont("Arial", 12, QFont.Bold))
+
+        save_button = QPushButton("Save Locally")
         save_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
+        save_button.setFont(QFont("Arial", 12, QFont.Bold))
+
         start_time_label = QLabel(f"Start Time: {promotion[-3]}")
         end_time_label = QLabel(f"End Time: {promotion[-2]}")
-        remaining_time_label = QLabel(f"Time Remaining: {datetime.datetime.strptime(promotion[-3], '%Y-%m-%d %H:%M:%S') - datetime.datetime.now()}")
-        end_time_label.move(20, 20)
-        start_time_label.setFont(QFont("Arial", 10, QFont.Bold))
-        end_time_label.setFont(QFont("Arial", 10, QFont.Bold))
         remaining_time_label.setFont(QFont("Arial", 10, QFont.Bold))
         start_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
         end_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
-        remaining_time_label.setStyleSheet("QLabel { color : #F5F7F7; }")
 
-        end_time = datetime.datetime.strptime(promotion[-3], '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.datetime.strptime(promotion[-3], '%d/%m/%Y %H:%M')
+
         # Update the remaining time label periodically
-        self.remaining_time_timer = QTimer(self)
-        self.remaining_time_timer.timeout.connect(lambda: self.update_remaining_time_label(remaining_time_label, end_time))
-        self.remaining_time_timer.start(100)
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.update_remaining_time_label(remaining_time_label, end_time))
+        timer.start(100)
 
-        ## ASSIGN THE BUTTON CLICK FUNCTIONS ##
         email_button.clicked.connect(lambda _, qr_code=f"temp_qr_{promotion[1]}.png", code=promotion[1], text=promotion[0]: self.email_QR(qr_code, code, text))
         save_button.clicked.connect(lambda _, qr_code_pixmap=qr_pixmap, current_promotion=promotion: self.save_locally(qr_code_pixmap, current_promotion))
+
+        # Add all the widgets to the layout
         promotion_layout.addWidget(company_label)
         promotion_layout.addWidget(text_label)
         promotion_layout.addWidget(voucher_label)
@@ -243,6 +275,7 @@ class PromotionsApp(QMainWindow):
         promotion_layout.addWidget(save_button)
 
         return promotion_widget
+
 
     def logout(self):
         logging.basicConfig(

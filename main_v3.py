@@ -22,7 +22,8 @@ color palette
 #79031D
 #000407
 """
-class PromotionsApp(QMainWindow):  
+class PromotionsApp(QMainWindow): 
+     
     
     def email_QR(self, QR_code, code, text):
         sender_email = 'cgatting@gmail.com'  # Replace with your email
