@@ -3,28 +3,25 @@ import random
 import smtplib
 import sqlite3
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from hashlib import md5
-from main_page_demo import PromotionsApp
+from business_main import BusinessMainPage
+#!NEED TO GO THROUGH AND REMOVE OTP AND REMOVE SMTP
+#!NEED TO GO THROUGH AND ADD SQL
+#!NEED TO GO THORUGH AND ADD LOGIC TO NEXT PAGE
+#!NEED TO ADD LOGIC TO FOGOTTEN EMAIL MAYBE A POP UP BOX AND EDIT FUNCTION
 
-
-class user_login(QMainWindow):
-    def go_to_main_page(self):
-            self.main_app_window = PromotionsApp() # Create an instance of the user_login window
+class Business_Login_Page(QMainWindow):
+    def go_to_main_page(self, user_email):
+        self.hide()  # Hide the current window (login page)
+        self.ui = BusinessMainPage(user_email)  # Create an instance of the BusinessMainPage
+        self.ui.show()        
     def user_login_message(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Congratulations! You have successfully logged in")
-        msg.setWindowTitle("Information")
-        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        retval = msg.exec_()
-        self.go_to_main_page()
-    def OTP_Sent_message(self):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
-        msg.setText("OTP has been sent to your email")
         msg.setWindowTitle("Information")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
@@ -42,39 +39,7 @@ class user_login(QMainWindow):
         msg.setWindowTitle("Error")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
-    def OTP_failure(self):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setText("Your OTP is incorrect")
-        msg.setWindowTitle("Error")
-        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        retval = msg.exec_()
-    def gen_otp(self):
-        otp = f'{random.randint(0, 9999):04d}'
-        return otp
-    def opt_send(self, otp_code):
-        _translate = QtCore.QCoreApplication.translate
-        sender_email = 'cgatting@gmail.com'
-        recipient_email = self.email_address.text()
-        smtp_server = 'smtp.gmail.com'
-        smtp_port = 587
-        smtp_username = 'cgatting@gmail.com'
-        smtp_password = 'oytu gdvz jnkt uyjh'
-        subject = 'Your OTP'
-        message = f'Your OTP is: {otp_code}'
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = recipient_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'plain'))
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_username, smtp_password)
-        server.sendmail(sender_email, recipient_email, msg.as_string())
-        self.OTP_Sent_message()
-        server.quit()
-    def send_email(self):
-        #Write username and password of self into an SQLite database
+    def check_account(self):
         _translate = QtCore.QCoreApplication.translate
         username = self.email_address.text()
         password = self.password.text()
@@ -82,31 +47,19 @@ class user_login(QMainWindow):
             self.error_empty()
         else:
             password = md5(password.encode('utf-8')).hexdigest()
-            conn = sqlite3.connect('users.db')
+            conn = sqlite3.connect('business.db')
             c = conn.cursor()
             ##NEEDS CHANGING TO LOGIN INSTEAD
-            c.execute('SELECT * FROM users WHERE email = ? AND password = ?', (username, password))
+            c.execute('SELECT * FROM accounts WHERE email = ? AND password = ?', (username, password))
             user = c.fetchone()
             if user is None:
                 self.no_account()
             else:
-                self.opt_send(OTP_USER_PASSWORD)
+                self.go_to_main_page(username)
                 pass
-               
-            conn.commit()
-            conn.close()
-    
-    def opt_verify(self, otp_code):
-        _translate = QtCore.QCoreApplication.translate
-        if otp_code == self.opt.text():
-            self.user_login_message()
-        else:
-            self.OTP_failure()
 
     def __init__(self, MainWindow):
         super().__init__()
-        global OTP_USER_PASSWORD
-        OTP_USER_PASSWORD = self.gen_otp()
         MainWindow.setObjectName("Login Page")
         MainWindow.resize(300, 472)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -152,11 +105,7 @@ class user_login(QMainWindow):
         self.opt.setMaxLength(4)
         self.opt.setClearButtonEnabled(False)
         self.opt.setObjectName("opt")
-        self.send_email_button = QtWidgets.QPushButton(self.centralwidget)
-        self.send_email_button.setGeometry(QtCore.QRect(150, 310, 121, 28))
-        self.send_email_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
-        self.send_email_button.setCheckable(False)
-        self.send_email_button.setObjectName("send_email_button")
+        
         self.confirmation_button = QtWidgets.QPushButton(self.centralwidget)
         self.confirmation_button.setGeometry(QtCore.QRect(20, 350, 261, 28))
         self.confirmation_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
@@ -184,19 +133,22 @@ class user_login(QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        self.send_email_button.clicked.connect(lambda: self.send_email())
-        self.confirmation_button.clicked.connect(lambda: self.opt_verify(OTP_USER_PASSWORD))
+        self.confirmation_button.clicked.connect(lambda: self.check_account())
         global user_email
-        user_email = self.email_address.text()
     
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "This is the Login Page"))
         self.email_address.setPlaceholderText(_translate("MainWindow", "Email Address"))
         self.password.setPlaceholderText(_translate("MainWindow", "Password"))
-        self.opt.setPlaceholderText(_translate("MainWindow", "OTP"))
-        self.send_email_button.setText(_translate("MainWindow", "Send Email"))
+        self.opt.setPlaceholderText(_translate("MainWindow", "Business Code"))
         self.confirmation_button.setText(_translate("MainWindow", "Confirm Registration"))
         self.forgot_password_button.setText(_translate("MainWindow", "Forgot Password"))
 
 
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    MainWindow = QMainWindow()
+    ui = Business_Login_Page(MainWindow)
+    MainWindow.show() 
+    sys.exit(app.exec_())

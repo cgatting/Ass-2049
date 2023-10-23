@@ -4,16 +4,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTa
 import datetime
 import sys
 class BusinessMainPage(QMainWindow):
-    
-    def __init__(self, username="demo@demo.com"):
-        def get_business_data():
-            conn = sqlite3.connect("business.db")
-            cursor = conn.cursor()
-            cursor.execute("SELECT business_name FROM accounts WHERE email=?", (username,))
-            user = cursor.fetchone()
-            conn.close()
-            return user
-        bus_username = get_business_data()
+    def __init__(self, username):
+        bus_username = self.get_business_data(username)
         super().__init__()
         self.setWindowTitle("Database Admin")
         self.setGeometry(100, 100, 800, 600)
@@ -90,7 +82,6 @@ class BusinessMainPage(QMainWindow):
         edit_dialog = QDialog(self)
         edit_dialog.setWindowTitle("Edit Data")
         edit_layout = QVBoxLayout()
-        print(self.table_widget.horizontalHeaderItem(col).text())
         if self.table_widget.horizontalHeaderItem(col).text() in ["StartDateTime", "EndDateTime"]:
             edit_field = QDateTimeEdit()
             edit_field.setDateTime(datetime.datetime.strptime(original_data, '%Y-%m-%d %H:%M:%S'))
@@ -180,4 +171,10 @@ class BusinessMainPage(QMainWindow):
         self.cursor.execute(insert_query, new_data)
         self.conn.commit()
         self.load_data()
-
+    def get_business_data(self, username):
+                conn = sqlite3.connect("business.db")
+                cursor = conn.cursor()
+                cursor.execute("SELECT business_name FROM accounts WHERE email=?", (username,))
+                user = cursor.fetchone()
+                conn.close()
+                return user

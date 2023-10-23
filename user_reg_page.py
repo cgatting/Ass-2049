@@ -10,13 +10,11 @@ from user_login_page import user_login
 # Define a class for the user registration window
 class user_reg(QMainWindow):
     # Function to open the user login window after successful registration
-    def user_login(self):
-        registration_successful = self.user_register()
+    def go_to_user_login(self):
+        registration_successful = True
+        # registration_successful = self.user_register()
         if registration_successful:
-            self.close()
-            self.ui.window = user_login()
-            self.ui.window.show()
-
+            self.user_login_window = user_login(MainWindow) # Create an instance of the user_login window
     # Function to display a success message after registration
     def registration_success(self):
         msg = QMessageBox()
@@ -60,7 +58,7 @@ class user_reg(QMainWindow):
         c = conn.cursor()
 
         # Check if the username is already taken
-        c.execute("SELECT COUNT(*) FROM users WHERE username=?", (username,))
+        c.execute("SELECT COUNT(*) FROM users WHERE email=?", (username,))
         if c.fetchone()[0] > 0:
             conn.close()
             self.error_username_taken()
@@ -76,7 +74,7 @@ class user_reg(QMainWindow):
             return False
 
         # Insert user data into the database
-        c.execute("INSERT INTO users (username, password, first_name, last_name, date_of_birth) VALUES(?,?,?,?,?)",
+        c.execute("INSERT INTO users (email, password, FirstName, LastName, DoB) VALUES(?,?,?,?,?)",
                   (username, md5(password.encode()).hexdigest(), first_name, last_name, DoB.toString("yyyy-MM-dd")))
         conn.commit()
         conn.close()
@@ -111,7 +109,8 @@ class user_reg(QMainWindow):
         retval = msg.exec_()
 
     # Function to set up the user registration window's UI
-    def setupUi(self, MainWindow):
+    def __init__(self, MainWindow):
+        super().__init__()
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(300, 472)
         MainWindow.setAcceptDrops(False)
@@ -166,7 +165,7 @@ class user_reg(QMainWindow):
         self.first_name.setClearButtonEnabled(False)
         self.first_name.setObjectName("opt")
         self.last_name = QtWidgets.QLineEdit(self.centralwidget)
-        self.last_name.setGeometry(QtCore.QRect(126, 239, 126, 27)
+        self.last_name.setGeometry(QtCore.QRect(126, 239, 126, 27))
         self.last_name.setStyleSheet("background-color: rgba(0, 0, 0, 0);\n"
                                     "border: 1px solid rgba(0, 0, 0, 0);\n"
                                     "border-bottom-color: rgba(0, 0, 0, 255);\n"
@@ -186,7 +185,7 @@ class user_reg(QMainWindow):
         self.confirmation_button.setCheckable(False)
         self.confirmation_button.setObjectName("confirmation_button")
         self.confirmation_button.setText("Confirm Registration")
-        self.confirmation_button.clicked.connect(lambda: self.user_login())
+        self.confirmation_button.clicked.connect(lambda: self.go_to_user_login())
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 300, 26))
@@ -195,6 +194,7 @@ class user_reg(QMainWindow):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.retranslateUi(MainWindow)
 
     # Function to translate UI elements (not provided in the code)
     def retranslateUi(self, MainWindow):
@@ -207,10 +207,10 @@ class user_reg(QMainWindow):
         self.confirmation_button.setText(_translate("MainWindow", "Confirm Registration"))
 
 # Main entry point
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
-    ui = user_reg()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     MainWindow = QMainWindow()
+#     ui = user_reg(MainWindow)  # Create an instance of the user_reg class
+#     MainWindow.show()
+#     sys.exit(app.exec_())
+

@@ -268,7 +268,7 @@ class AdminPage(QMainWindow):
         for i, column in enumerate(self.column_names):
             if "DateTime" in column:
                 try:
-                    values[i] = datetime.datetime.strptime(values[i], "%d/%m/%Y %H:%M").strftime("%Y-%m-%d %H:%M:%S")
+                    values[i] = datetime.datetime.strptime(values[i], "%d/%m/%Y %H:%M").strftime("%Y/%m/%d %H:%M")
                 except:
                     pass
 
