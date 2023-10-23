@@ -14,6 +14,8 @@ from email.mime.image import MIMEImage
 import os, sys  # Import the os module for working with the operating system
 import datetime  # Import the datetime module for handling date and time
 from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtWidgets import QDesktopWidget  # Import QDesktopWidget
+
 
 # Define a color palette using hexadecimal color codes
 """
@@ -30,7 +32,8 @@ class PromotionsApp(QMainWindow):
         self.promotion_timers = {}
         # Set up the main user interface
         MainWindow.setWindowTitle("Promotions Dashboard")
-        MainWindow.setGeometry(0, 0, 1020, 600)
+        screen = QDesktopWidget().screenGeometry()
+        self.setGeometry(0, 0, screen.width(), screen.height())        # MainWindow.setGeometry(0, 0, 1020, 600)
         MainWindow.setWindowIcon(QIcon("icon.png"))
 
         central_widget = QWidget()
@@ -307,6 +310,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
     ui = PromotionsApp()
-    ui.__init__()
-    MainWindow.show()
     sys.exit(app.exec_())

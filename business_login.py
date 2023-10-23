@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from hashlib import md5
 from business_main import BusinessMainPage
+from admin import AdminPage
 #!NEED TO GO THROUGH AND REMOVE OTP AND REMOVE SMTP
 #!NEED TO GO THROUGH AND ADD SQL
 #!NEED TO GO THORUGH AND ADD LOGIC TO NEXT PAGE
@@ -17,7 +18,15 @@ class Business_Login_Page(QMainWindow):
     def go_to_main_page(self, user_email):
         self.hide()  # Hide the current window (login page)
         self.ui = BusinessMainPage(user_email)  # Create an instance of the BusinessMainPage
-        self.ui.show()        
+        self.ui.show()       
+    def gen_new_password(self, user_email):
+        if user_email:
+            self.hide()
+            self.ui = AdminPage(user_email).password_reset()
+            
+        else:
+            self.no_email_inputted()
+
     def user_login_message(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
@@ -36,6 +45,13 @@ class Business_Login_Page(QMainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText("Either details are incorrect or you do not have an account yet")
+        msg.setWindowTitle("Error")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        retval = msg.exec_()
+    def no_email_inputted(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("You need to enter an email to continue")
         msg.setWindowTitle("Error")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
@@ -93,19 +109,6 @@ class Business_Login_Page(QMainWindow):
         self.password.setText("")
         self.password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password.setObjectName("password")
-        self.opt = QtWidgets.QLineEdit(self.centralwidget)
-        self.opt.setGeometry(QtCore.QRect(20, 310, 121, 30))
-        self.opt.setStyleSheet("background-color: rgba(0, 0, 0, 0);\n"
-"border: 1px solid rgba(0, 0, 0, 0);\n"
-"border-bottom-color: rgba(0, 0, 0, 255);\n"
-"padding-bottom: 7px;\n"
-"color: #F5F7F7;")
-        self.opt.setInputMask("")
-        self.opt.setText("")
-        self.opt.setMaxLength(4)
-        self.opt.setClearButtonEnabled(False)
-        self.opt.setObjectName("opt")
-        
         self.confirmation_button = QtWidgets.QPushButton(self.centralwidget)
         self.confirmation_button.setGeometry(QtCore.QRect(20, 350, 261, 28))
         self.confirmation_button.setStyleSheet("QPushButton{background-color: #000407; color: white;} QPushButton::pressed {background-color: #edb518;}")
@@ -134,6 +137,7 @@ class Business_Login_Page(QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.confirmation_button.clicked.connect(lambda: self.check_account())
+        self.forgot_password_button.clicked.connect(lambda: self.gen_new_password(self.email_address.text()))
         global user_email
     
     def retranslateUi(self, MainWindow):
@@ -141,7 +145,6 @@ class Business_Login_Page(QMainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "This is the Login Page"))
         self.email_address.setPlaceholderText(_translate("MainWindow", "Email Address"))
         self.password.setPlaceholderText(_translate("MainWindow", "Password"))
-        self.opt.setPlaceholderText(_translate("MainWindow", "Business Code"))
         self.confirmation_button.setText(_translate("MainWindow", "Confirm Registration"))
         self.forgot_password_button.setText(_translate("MainWindow", "Forgot Password"))
 

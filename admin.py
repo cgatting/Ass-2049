@@ -1,5 +1,4 @@
 import sqlite3
-import hashlib
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -16,12 +15,18 @@ from PyQt5.QtWidgets import (
     QDateTimeEdit,
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
 import datetime
+import random
+import smtplib
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from hashlib import md5
 
 class AdminPage(QMainWindow):
     
-    def __init__(self):
+    def __init__(self, email):
         super().__init__()
         self.setWindowTitle("Database Admin")
         self.setGeometry(100, 100, 800, 600)
@@ -71,7 +76,13 @@ class AdminPage(QMainWindow):
         self.layout.addWidget(button)
         button.setStyleSheet("background-color: #000407; color: white;")
         return button
-
+    def OTP_Sent_message(self):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("OTP has been sent to your email")
+            msg.setWindowTitle("Information")
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            retval = msg.exec_()
     def create_search_input(self):
         # Create a search input field with a placeholder text
         search_input = QLineEdit()
@@ -260,7 +271,7 @@ class AdminPage(QMainWindow):
         if password_column in self.column_names:
             password_index = self.column_names.index(password_column)-1
             password = values[password_index]
-            md5_password = hashlib.md5(password.encode()).hexdigest()
+            md5_password = md5(password.encode()).hexdigest()
             values[password_index] = md5_password
 
     def format_datetime(self, values):
@@ -299,9 +310,45 @@ class AdminPage(QMainWindow):
             self.cursor.execute(f"DELETE FROM {self.table_name} WHERE ID = ?", (item_id,))
             self.conn.commit()
             self.table_widget.removeRow(row)
+    def write_new_business_password(self):
+        digit_string = ''.join(random.choice('0123456789') for _ in range(4))
+        return digit_string
+        
+    def password_reset(self):
+        email = "cgatting@gmail.com"
+        new_password = self.write_new_business_password()
+        _translate = QtCore.QCoreApplication.translate
+        sender_email = 'cgatting@gmail.com'
+        recipient_email = email
+        smtp_server = 'smtp.gmail.com'
+        smtp_port = 587
+        smtp_username = 'cgatting@gmail.com'
+        smtp_password = 'oytu gdvz jnkt uyjh'
+        subject = 'Updated Password'
+        message = f'Your New Password is is: {new_password}'
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'plain'))
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.sendmail(sender_email, recipient_email, msg.as_string())
+        self.OTP_Sent_message()
+        server.quit()
+        conn = sqlite3.connect('business.db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE accounts SET password = ? WHERE email = ?", (md5(new_password.encode()).hexdigest(), email))
+        conn.commit()
+        conn.close()
+        return new_password
+        
 
-if __name__ == "__main__":
-    app = QApplication([])
-    window = AdminPage()
-    window.show()
-    app.exec()
+
+# if __name__ == "__main__":
+#     app = QApplication([])
+#     window = AdminPage()
+#     window.show()
+#     app.exec()
+
