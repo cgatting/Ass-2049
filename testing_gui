@@ -1,6 +1,5 @@
 import sqlite3  # Import the SQLite database module for data storage
-from qrcode.main import QRCode  # noqa
-import qrcode.constants as qrcode_constants
+import qrcode  # Import the qrcode library for generating QR codes
 from PyQt5.QtWidgets import (  # Import GUI widgets from PyQt5 library
     QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QPushButton,
     QScrollArea, QFrame, QFileDialog, QLineEdit, QHBoxLayout
@@ -14,8 +13,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 import os, sys  # Import the os module for working with the operating system
 import datetime  # Import the datetime module for handling date and time
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QDesktopWidget  # Import QDesktopWidget
-from PyQt5.QtCore import QDir
 
 
 # Define a color palette using hexadecimal color codes
@@ -44,16 +43,6 @@ class PromotionsApp(QMainWindow):
         central_widget_layout = QVBoxLayout()
         central_widget.setLayout(central_widget_layout)
 
-        search_label = QLabel("Search:")
-        search_input = QLineEdit()
-        search_input.setPlaceholderText("Enter search criteria...")
-
-        # Connect the search input to the filter_promotions method when text is changed
-        search_input.textChanged.connect(lambda: self.filter_promotions(search_input.text(), container_layout))
-
-        central_widget_layout.addWidget(search_label)
-        central_widget_layout.addWidget(search_input)
-
         header_widget = QFrame()
         header_widget.setStyleSheet("background-color: #000407; border-bottom: 1px solid #000407;")
         header_layout = QHBoxLayout()
@@ -77,7 +66,7 @@ class PromotionsApp(QMainWindow):
         header_layout.addStretch(1)
         header_layout.addWidget(date_label)
         header_layout.addWidget(time_label)
-
+        
         logout_button = QPushButton("Logout")
         logout_button.setStyleSheet("QPushButton{background-color: #edb518; color: white;} QPushButton::pressed {background-color: #f3cc5f;}")
         logout_button.clicked.connect(self.logout)
@@ -229,7 +218,7 @@ class PromotionsApp(QMainWindow):
         remaining_time = end_time - datetime.datetime.now()
         remaining_time -= datetime.timedelta(microseconds=remaining_time.microseconds)
         remaining_time_label.setText(f"Time Remaining: {remaining_time}")
-
+        
         company_label = QLabel(f"Company: {promotion[-1]}")
         company_label.setFont(QFont("Arial", 24, QFont.Bold))
         company_label.setStyleSheet("QLabel { color : #F5F7F7; }")
@@ -243,15 +232,14 @@ class PromotionsApp(QMainWindow):
         voucher_label.setStyleSheet("QLabel { color : #F5F7F7; }")
 
         # Generate a QR code for the voucher code
-        qr = QRCode(
+        qr = qrcode.QRCode(
             version=1,
-            error_correction=qrcode_constants.ERROR_CORRECT_L,
             box_size=5,
             border=4,
         )
         qr.add_data(promotion[1])
         qr.make(fit=True)
-        qr_image = qr.make_image(fill_color="#79031D", back_color="black")
+        qr_image = qr.make_image(fill_color="#", back_color="black")
         qr_image.save(f"temp_qr_{promotion[1]}.png")
         qr_pixmap = QPixmap(f"temp_qr_{promotion[1]}.png")
         qr_code_label = QLabel()
