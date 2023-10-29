@@ -10,11 +10,10 @@ from user_login_page import user_login
 # Define a class for the user registration window
 class user_reg(QMainWindow):
     # Function to open the user login window after successful registration
-    def go_to_user_login(self):
-        registration_successful = True
-        # registration_successful = self.user_register()
+    def go_to_user_login(self, Mainwindow):
+        registration_successful = self.user_register()
         if registration_successful:
-            self.user_login_window = user_login(MainWindow) # Create an instance of the user_login window
+            self.user_login_window = user_login(Mainwindow) # Create an instance of the user_login window
     # Function to display a success message after registration
     def registration_success(self):
         msg = QMessageBox()
@@ -32,7 +31,15 @@ class user_reg(QMainWindow):
         msg.setWindowTitle("Error")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
-
+        
+    def error_invalid_username(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("This is not a valid email address")
+        msg.setWindowTitle("Error")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        retval = msg.exec_()
+        
     # Calculate age based on the date of birth
     def calculate_age(self, dob):
         today = datetime.date.today()
@@ -56,7 +63,16 @@ class user_reg(QMainWindow):
         # Connect to the SQLite database
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-
+        c.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        email TEXT,
+        password TEXT,
+        FirstName TEXT,
+        LastName TEXT,
+        DoB DATE
+    )
+''')
         # Check if the username is already taken
         c.execute("SELECT COUNT(*) FROM users WHERE email=?", (username,))
         if c.fetchone()[0] > 0:
@@ -66,13 +82,14 @@ class user_reg(QMainWindow):
 
         # Calculate age from DoB
         age = self.calculate_age(DoB)
-
         # Check if the user is 18 or older
         if age < 18:
             conn.close()
             self.error_age_too_young()
             return False
-
+        if "@" not in username:
+            self.error_invalid_username()
+            return False
         # Insert user data into the database
         c.execute("INSERT INTO users (email, password, FirstName, LastName, DoB) VALUES(?,?,?,?,?)",
                   (username, md5(password.encode()).hexdigest(), first_name, last_name, DoB.toString("yyyy-MM-dd")))
@@ -185,7 +202,7 @@ class user_reg(QMainWindow):
         self.confirmation_button.setCheckable(False)
         self.confirmation_button.setObjectName("confirmation_button")
         self.confirmation_button.setText("Confirm Registration")
-        self.confirmation_button.clicked.connect(lambda: self.go_to_user_login())
+        self.confirmation_button.clicked.connect(lambda: self.go_to_user_login(MainWindow))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 300, 26))
@@ -206,11 +223,11 @@ class user_reg(QMainWindow):
         self.last_name.setPlaceholderText(_translate("MainWindow", "Last Name"))
         self.confirmation_button.setText(_translate("MainWindow", "Confirm Registration"))
 
-# Main entry point
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     MainWindow = QMainWindow()
-#     ui = user_reg(MainWindow)  # Create an instance of the user_reg class
-#     MainWindow.show()
-#     sys.exit(app.exec_())
-
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = user_reg(MainWindow)
+    ui.__init__(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

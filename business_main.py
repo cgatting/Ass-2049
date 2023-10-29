@@ -171,10 +171,11 @@ class BusinessMainPage(QMainWindow):
         self.cursor.execute(insert_query, new_data)
         self.conn.commit()
         self.load_data()
+        
     def get_business_data(self, username):
                 conn = sqlite3.connect("business.db")
                 cursor = conn.cursor()
-                cursor.execute("SELECT business_name FROM accounts WHERE email=?", (username,))
+                cursor.execute("SELECT BusinessName FROM accounts WHERE email=?", (username,))
                 user = cursor.fetchone()
                 conn.close()
                 return user

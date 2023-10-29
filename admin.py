@@ -115,6 +115,7 @@ class AdminPage(QMainWindow):
             self.table_name = table_name
             self.conn = sqlite3.connect(f'{database_name}.db')
             self.cursor = self.conn.cursor()
+            self.create_table_if_not_exists(table_name)
             self.load_data()
         except sqlite3.Error as e:
             print("Database connection error:", e)
@@ -168,6 +169,25 @@ class AdminPage(QMainWindow):
         search_results = self.cursor.fetchall()
 
         self.populate_table(search_results)
+        
+    def create_table_if_not_exists(self, table_name):
+    # Check if the table exists
+        self.cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+        existing_table = self.cursor.fetchone()
+
+        # If the table does not exist, create it
+        if existing_table is None:
+            # Define the table schema with an automatically incrementing 'ID', 'email', 'password', and 'BusinessName'
+            table_creation_query = f'''
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL,
+                    BusinessName TEXT
+                )
+            '''
+            self.cursor.execute(table_creation_query)
+            self.conn.commit()
 
     def edit_item(self):
         # Edit the selected item
@@ -346,9 +366,9 @@ class AdminPage(QMainWindow):
         
 
 
-# if __name__ == "__main__":
-#     app = QApplication([])
-#     window = AdminPage()
-#     window.show()
-#     app.exec()
+if __name__ == "__main__":
+    app = QApplication([])
+    window = AdminPage(email="None")
+    window.show()
+    app.exec()
 

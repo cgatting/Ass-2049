@@ -32,7 +32,7 @@ color palette
 
 
 class PromotionsApp(QMainWindow):
-    def __init__(self):
+    def __init__(self, MainWindow):
         super().__init__()
         self.promotion_timers = {}
         self.login()
@@ -90,21 +90,20 @@ class PromotionsApp(QMainWindow):
         central_widget_layout.addWidget(header_widget)
         central_widget_layout.addWidget(scroll_area)
 
-        container_widget = QWidget()
-        scroll_area.setWidget(container_widget)
-        container_layout = QVBoxLayout()
-        container_widget.setLayout(container_layout)
-        container_widget.setStyleSheet("border-radius: 10px;")
+        self.container_widget = QWidget()
+        scroll_area.setWidget(self.container_widget)
+        self.container_layout = QVBoxLayout()
+        self.container_widget.setLayout(self.container_layout)
+        self.container_widget.setStyleSheet("border-radius: 10px;")
         scroll_area.setStyleSheet("border-radius: 10px;")
         
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Search promotions...")
         self.search_bar.setStyleSheet("color: white;")
-        self.search_bar.textChanged.connect(lambda: self.filter_promotions())
+        self.search_bar.textEdited.connect(lambda: self.update_promotions_database())
 
         # Add the search bar to the header layout
         header_layout.addWidget(self.search_bar)
-
 
         # Create the promotions table in the database if it doesn't exist
         self.create_promotions_table()
@@ -115,25 +114,38 @@ class PromotionsApp(QMainWindow):
         # Create promotion widgets and add them to the layout
         for promotion in self.promotions:
             promotion_widget = self.create_promotion_widget(promotion)
-            container_layout.addWidget(promotion_widget)
-
+            self.container_layout.addWidget(promotion_widget)
+        
         self.show()
         
-    def filter_promotions(self):
-        search_text = self.search_bar.text().strip().lower()
-        for promotion_widget in self.findChildren(QtWidgets.QLabel):
-            text_label = promotion_widget.text()
-            if text_label:
-                promotion_text = text_label.lower()
-                if search_text and search_text not in promotion_text:
-                    # Hide the promotion if the search text is not in the promotion's text
-                    promotion_widget.hide()
-                else:
-                    # Show the promotion if the search text is found in the promotion's text
-                    promotion_widget.show()
+    def update_promotions_database(self):
+        search_text = self.search_bar.text()
+        # Connect to the new database
+        conn = sqlite3.connect("promotions.db")
+        cursor = conn.cursor()
 
-                    
-                                    
+        # Fetch promotions from the new database
+        cursor.execute("SELECT * FROM promotions WHERE CouponCode LIKE ? OR BusinessName LIKE ?",
+                    ('%' + search_text + '%', '%' + search_text + '%'))
+
+        database = cursor.fetchall()
+        
+        # Clear the existing promotions from the UI
+        while self.container_layout.count() > 0:
+            item = self.container_layout.takeAt(0)
+            if item:
+                widget = item.widget()
+                if widget:
+                    widget.deleteLater()
+
+        # Create promotion widgets for the new promotions and add them to the layout
+        for promotion in database:
+            promotion_widget = self.create_promotion_widget(promotion)
+            self.container_layout.addWidget(promotion_widget)
+
+        conn.close()
+
+
     def email_QR(self, QR_code, code, text):
         # Email sending configuration
         sender_email = 'cgatting@gmail.com'
@@ -191,7 +203,7 @@ class PromotionsApp(QMainWindow):
             remaining_time = end_time - datetime.datetime.now()
             remaining_time -= datetime.timedelta(
                 microseconds=remaining_time.microseconds)
-            remaining_time_label.setText(f"Time Remaining: {remaining_time}")
+            # remaining_time_label.setText(f"Time Remaining: {remaining_time}")
 
     def create_promotions_table(self):
         conn = sqlite3.connect("promotions.db")
@@ -329,8 +341,4 @@ class PromotionsApp(QMainWindow):
         logger.info('')
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
-    ui = PromotionsApp()
-    sys.exit(app.exec_())
+

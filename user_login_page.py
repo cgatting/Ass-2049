@@ -11,16 +11,16 @@ from main_page_demo import PromotionsApp
 
 
 class user_login(QMainWindow):
-    def go_to_main_page(self):
-            self.main_app_window = PromotionsApp() # Create an instance of the user_login window
-    def user_login_message(self):
+    def go_to_main_page(self, MainWindow):
+            self.main_app_window = PromotionsApp(MainWindow) # Create an instance of the user_login window
+    def user_login_message(self, MainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Congratulations! You have successfully logged in")
         msg.setWindowTitle("Information")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         retval = msg.exec_()
-        self.go_to_main_page()
+        self.go_to_main_page(MainWindow)
     def OTP_Sent_message(self):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
@@ -96,10 +96,10 @@ class user_login(QMainWindow):
             conn.commit()
             conn.close()
     
-    def opt_verify(self, otp_code):
+    def opt_verify(self, otp_code, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         if otp_code == self.opt.text():
-            self.user_login_message()
+            self.user_login_message(MainWindow)
         else:
             self.OTP_failure()
 
@@ -185,7 +185,7 @@ class user_login(QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.send_email_button.clicked.connect(lambda: self.send_email())
-        self.confirmation_button.clicked.connect(lambda: self.opt_verify(OTP_USER_PASSWORD))
+        self.confirmation_button.clicked.connect(lambda: self.opt_verify(OTP_USER_PASSWORD, MainWindow))
         global user_email
         user_email = self.email_address.text()
     
